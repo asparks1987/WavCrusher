@@ -20,6 +20,12 @@ public partial class Form1 : Form
     private const string ArchiveCancelledStatus = "Cancelled";
     private const string ArchiveSkippedStatus = "Skipped";
     private const string ArchiveConflictStatus = "Conflict";
+    private static readonly string[] ManifestFileNameCandidates =
+    [
+        TarballPackagePaths.ManifestFileName,
+        "archive-manifest.v1.json",
+        "wavcompactor-manifest.v1.json"
+    ];
 
     private readonly IWaveFileScanner _scanner;
     private readonly IArchiveCompressor _compressor;
@@ -453,7 +459,7 @@ public partial class Form1 : Form
 
             TarFile.ExtractToDirectory(tarPath, _loadedPackageStagingRoot, overwriteFiles: true);
 
-            var manifestPath = Path.Combine(_loadedPackageStagingRoot, TarballPackagePaths.ManifestFileName);
+            var manifestPath = ResolveManifestPath(_loadedPackageStagingRoot);
             if (!File.Exists(manifestPath))
             {
                 throw new InvalidOperationException("Manifest file is missing from package.");
@@ -911,6 +917,76 @@ public partial class Form1 : Form
         normalizedPath = Path.GetFullPath(path);
         Directory.CreateDirectory(normalizedPath);
         return true;
+    }
+
+    private static string ResolveManifestPath(string packageStagingRoot)
+    {
+        foreach (var candidate in ManifestFileNameCandidates)
+        {
+            var exactPath = Path.Combine(packageStagingRoot, candidate);
+            if (File.Exists(exactPath))
+            {
+                return exactPath;
+            }
+        }
+
+        foreach (var candidate in Directory.EnumerateFiles(packageStagingRoot, "*.json", SearchOption.AllDirectories))
+        {
+            if (IsLikelyTarballManifest(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return Path.Combine(packageStagingRoot, TarballPackagePaths.ManifestFileName);
+    }
+
+    private static bool IsLikelyTarballManifest(string path)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            using var document = JsonDocument.Parse(stream);
+
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            if (!document.RootElement.TryGetProperty("format", out var formatElement))
+            {
+                return false;
+            }
+
+            if (!string.Equals(formatElement.GetString(), TarballPackagePaths.ManifestFormat, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (!document.RootElement.TryGetProperty("version", out _))
+            {
+                return false;
+            }
+
+            if (!document.RootElement.TryGetProperty("items", out var itemsElement) || itemsElement.ValueKind != JsonValueKind.Array)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
     }
 
     private static void ValidateManifest(TarballArchiveManifest manifest)
