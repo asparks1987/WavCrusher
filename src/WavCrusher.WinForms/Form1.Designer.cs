@@ -16,12 +16,17 @@ partial class Form1
     private Button scanButton;
     private Button archiveButton;
     private Button restoreButton;
+    private Button clearButton;
+    private Button aboutButton;
     private Button cancelButton;
     private RadioButton restoreToFolderRadioButton;
     private RadioButton restoreToOriginalRadioButton;
     private DataGridView filesGrid;
     private ProgressBar progressBar;
+    private ProgressBar itemProgressBar;
     private Label statusLabel;
+    private Label progressSummaryLabel;
+    private Label itemProgressLabel;
     private Label packageSummaryLabel;
     private Label sourceLabel;
     private Label outputLabel;
@@ -55,12 +60,17 @@ partial class Form1
         scanButton = new Button();
         archiveButton = new Button();
         restoreButton = new Button();
+        clearButton = new Button();
+        aboutButton = new Button();
         cancelButton = new Button();
         restoreToFolderRadioButton = new RadioButton();
         restoreToOriginalRadioButton = new RadioButton();
         filesGrid = new DataGridView();
         progressBar = new ProgressBar();
+        itemProgressBar = new ProgressBar();
         statusLabel = new Label();
+        progressSummaryLabel = new Label();
+        itemProgressLabel = new Label();
         packageSummaryLabel = new Label();
         sourceLabel = new Label();
         outputLabel = new Label();
@@ -88,7 +98,7 @@ partial class Form1
         rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32F));
         rootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
-        rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 80F));
 
         sourceLabel.Text = "Source folder";
         sourceLabel.TextAlign = ContentAlignment.MiddleLeft;
@@ -164,6 +174,17 @@ partial class Form1
         restoreButton.AccessibleName = "Restore files from package";
         restoreButton.Click += RestoreButton_Click;
 
+        clearButton.Text = "Clear";
+        clearButton.AutoSize = true;
+        clearButton.Enabled = false;
+        clearButton.AccessibleName = "Clear current job state";
+        clearButton.Click += ClearButton_Click;
+
+        aboutButton.Text = "About";
+        aboutButton.AutoSize = true;
+        aboutButton.AccessibleName = "About WavCrusher";
+        aboutButton.Click += AboutButton_Click;
+
         cancelButton.Text = "Cancel";
         cancelButton.AutoSize = true;
         cancelButton.Enabled = false;
@@ -207,9 +228,22 @@ partial class Form1
         });
         filesGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
+            DataPropertyName = "OriginalLocation",
+            HeaderText = "Original location",
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+            MinimumWidth = 260
+        });
+        filesGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
             DataPropertyName = "LengthBytes",
             HeaderText = "Bytes",
             Width = 110
+        });
+        filesGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            DataPropertyName = "CompressionRatioText",
+            HeaderText = "Ratio",
+            Width = 90
         });
         filesGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
@@ -229,10 +263,24 @@ partial class Form1
         progressBar.AccessibleName = "Operation progress";
         progressBar.Style = ProgressBarStyle.Blocks;
 
+        itemProgressBar.Dock = DockStyle.Fill;
+        itemProgressBar.AccessibleName = "Current item progress";
+        itemProgressBar.Style = ProgressBarStyle.Blocks;
+
         statusLabel.TextAlign = ContentAlignment.MiddleLeft;
         statusLabel.AutoEllipsis = true;
         statusLabel.Dock = DockStyle.Fill;
         statusLabel.AccessibleName = "Status";
+
+        progressSummaryLabel.Text = "Overall progress";
+        progressSummaryLabel.TextAlign = ContentAlignment.MiddleLeft;
+        progressSummaryLabel.AutoEllipsis = true;
+        progressSummaryLabel.Dock = DockStyle.Fill;
+
+        itemProgressLabel.Text = "Current item";
+        itemProgressLabel.TextAlign = ContentAlignment.MiddleLeft;
+        itemProgressLabel.AutoEllipsis = true;
+        itemProgressLabel.Dock = DockStyle.Fill;
 
         packageSummaryLabel.Text = "No package loaded.";
         packageSummaryLabel.TextAlign = ContentAlignment.MiddleLeft;
@@ -247,14 +295,24 @@ partial class Form1
         commandPanel.Controls.Add(scanButton);
         commandPanel.Controls.Add(archiveButton);
         commandPanel.Controls.Add(restoreButton);
+        commandPanel.Controls.Add(clearButton);
+        commandPanel.Controls.Add(aboutButton);
         commandPanel.Controls.Add(cancelButton);
 
         statusPanel.ColumnCount = 2;
-        statusPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200F));
+        statusPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220F));
         statusPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        statusPanel.RowCount = 3;
+        statusPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 18F));
+        statusPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 18F));
+        statusPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         statusPanel.Dock = DockStyle.Fill;
-        statusPanel.Controls.Add(progressBar, 0, 0);
-        statusPanel.Controls.Add(statusLabel, 1, 0);
+        statusPanel.Controls.Add(progressSummaryLabel, 0, 0);
+        statusPanel.Controls.Add(progressBar, 1, 0);
+        statusPanel.Controls.Add(itemProgressLabel, 0, 1);
+        statusPanel.Controls.Add(itemProgressBar, 1, 1);
+        statusPanel.Controls.Add(statusLabel, 0, 2);
+        statusPanel.SetColumnSpan(statusLabel, 2);
 
         rootLayout.Controls.Add(sourceLabel, 0, 0);
         rootLayout.Controls.Add(sourcePathTextBox, 1, 0);

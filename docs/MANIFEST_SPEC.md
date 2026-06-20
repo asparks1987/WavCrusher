@@ -1,4 +1,4 @@
-﻿# Manifest and Journal Specification
+# Manifest and Journal Specification
 
 **Format family:** WavCrusher Archive Manifest  
 **Initial major version:** 1  

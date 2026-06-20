@@ -1,4 +1,4 @@
-﻿# Release and Packaging Plan
+# Release and Packaging Plan
 
 ## 1. Goals
 
@@ -11,32 +11,46 @@ A WavCrusher release must be:
 - Complete with licenses and local documentation.
 - Conservative about auto-update and installation side effects.
 
-## 2. Planned release form
+## 2. Release form
 
-Start with a **portable ZIP**. It is transparent, easy to checksum, easy to preserve with an archive set, and avoids installer upgrade/uninstall risks before they are designed.
+The v1.0.0a build produces a **self-contained Windows x64 MSI installer** plus a published application folder under `artifacts/`. The installer gives normal users a familiar setup flow, desktop shortcut, and themed icon while preserving the recovery principle: WavPack sidecars remain visible in the installed payload.
 
-Suggested layout:
+Current installed layout:
 
 ```text
-WavCrusher-1.0.0-win-x64/
-  WavCrusher.exe
+C:\Program Files\WaveCrusher\
+  WavCrusher.WinForms.exe
+  WavCrusher.*.dll
   wavpack.exe
   wvunpack.exe
-  dependency.json
-  LICENSE.txt
-  THIRD_PARTY_NOTICES.txt
-  WavPack-LICENSE.txt
-  README.html
-  README.md
-  docs/
-  schemas/
-  SHA256SUMS.txt
-  SBOM.spdx.json
+  third_party/wavpack/
+    LICENSE
+    VERSION
+    dependency.json
+    win-x64/
+      wavpack.exe
+      wvunpack.exe
 ```
 
-The app may be a self-contained single-file executable. WavPack binaries must remain visible sidecars so users can recover archives even without the app.
+The MSI is generated at:
 
-## 3. Versioning
+```text
+artifacts/installer/WavCrusher.Setup.<version>.msi
+```
+
+A portable ZIP can still be added later as a secondary artifact because it is convenient to preserve beside archive sets.
+
+## 3. Build command
+
+```powershell
+.\buildwavcrusher.ps1 -NoRestore
+```
+
+The script publishes `win-x64` self-contained, generates the themed application icon, copies WavPack sidecars, bootstraps WiX Toolset locally under `artifacts/tools/`, and builds the MSI.
+
+Do not enable trimming unless the complete WinForms application and serialization paths are tested. Do not enable Native AOT merely for packaging simplicity.
+
+## 4. Versioning
 
 Use semantic versioning for application releases:
 
@@ -44,80 +58,21 @@ Use semantic versioning for application releases:
 MAJOR.MINOR.PATCH[-prerelease]
 ```
 
-- Major: incompatible manifest/profile or major product behavior changes.
-- Minor: backward-compatible features.
-- Patch: compatible fixes.
-
 Archive profile and manifest versions are separate identifiers. App version changes do not automatically require a manifest major bump.
-
-## 4. .NET runtime
-
-Target .NET 10 LTS and pin a supported patch SDK in `global.json` at release build time. Keep patch dependencies current within the supported .NET 10 lifecycle and rerun the entire release suite after updates.
-
-Suggested publish command, subject to implementation testing:
-
-```powershell
-dotnet publish src/WavCrusher.WinForms/WavCrusher.WinForms.csproj `
-  -c Release `
-  -r win-x64 `
-  --self-contained true `
-  -p:PublishSingleFile=true `
-  -p:ContinuousIntegrationBuild=true
-```
-
-Do not enable trimming unless the complete WinForms application and serialization paths are tested and required metadata is preserved. Do not enable Native AOT merely for packaging simplicity; assess compatibility and debugging first.
 
 ## 5. WavPack dependency acquisition
 
 For the pinned official release:
 
 1. Retrieve the exact Windows x64 asset from the official project release.
-2. Verify upstream release information through at least the official project site/repository.
-3. Calculate SHA-256 locally.
-4. Record:
-   - Version.
-   - Original asset filename.
-   - Source release reference.
-   - Download/retrieval date.
-   - Asset size/hash.
-   - Extracted `wavpack.exe` and `wvunpack.exe` sizes/hashes.
-   - Reported versions.
-   - License filenames/hashes.
-5. Store the complete upstream license unmodified.
-6. Require build/startup verification against `dependency.json`.
+2. Calculate SHA-256 locally.
+3. Record version, source, asset filename, size, hashes, reported versions, and license files.
+4. Store the complete upstream license unmodified.
+5. Require build/startup verification against `dependency.json`.
 
-Never put sample or guessed hashes into a release. CI must reject placeholders such as `TODO`, `REPLACE_ME`, or repeated dummy hex.
+Never put sample or guessed hashes into a release.
 
-## 6. Dependency metadata example
-
-```json
-{
-  "name": "WavPack",
-  "version": "5.9.0",
-  "platform": "win-x64",
-  "source": "official-upstream-release",
-  "releaseAsset": {
-    "fileName": "RECORD_REAL_ASSET_NAME",
-    "size": 0,
-    "sha256": "RECORD_REAL_SHA256"
-  },
-  "files": [
-    {
-      "path": "wavpack.exe",
-      "sha256": "RECORD_REAL_SHA256"
-    },
-    {
-      "path": "wvunpack.exe",
-      "sha256": "RECORD_REAL_SHA256"
-    }
-  ],
-  "license": "WavPack-LICENSE.txt"
-}
-```
-
-This example is intentionally invalid release metadata until real values replace placeholders.
-
-## 7. Build provenance
+## 6. Build provenance
 
 Release CI should record:
 
@@ -131,93 +86,40 @@ Release CI should record:
 - Artifact SHA-256.
 - SBOM.
 
-Prefer reproducible/deterministic managed builds, but do not claim byte-for-byte reproducibility until independently demonstrated.
-
-## 8. Signing
+## 7. Signing
 
 Code signing is recommended after project ownership, publisher identity, and certificate protection are established. Signing must not replace checksums or provenance.
 
-Document:
-
-- Publisher name.
-- Certificate chain and timestamp policy.
-- Key custody and rotation.
-- What a valid signature means.
-
 Never commit signing secrets. Release workflows should use protected environments and least privilege.
 
-## 9. Update policy
+## 8. Update policy
 
 Version 1 should not contain an auto-updater or executable downloader. The About page may provide a plain source/release reference only when the user explicitly opens it.
 
-Users install updates manually after verifying signatures/checksums. A future updater requires a separate threat model, rollback strategy, signed metadata format, and ADR.
+## 9. Installer policy
 
-## 10. Portable settings and user data
+The MSI installer is now part of the alpha release tooling. It must continue to satisfy:
 
-By default:
+- Per-machine install to `C:\Program Files\WaveCrusher`.
+- Desktop shortcut creation.
+- Standard-user app operation after install.
+- Uninstall that never touches archive/source/user content.
+- Visible bundled WavPack tools and license/provenance metadata.
+- No file associations unless explicitly designed later.
+- Code signing when publisher identity and certificate custody are ready.
 
-- Application binaries and WavPack sidecars are read-only install content.
-- Per-user preferences/logs live under an appropriate local application-data directory.
-- Archive evidence lives under the selected destination root.
-- Temporary restore data uses an operation-owned workspace with explicit capacity checks.
+The installer must never delete `.wv`, `.wav`, manifests, reports, or user settings without explicit, narrowly scoped consent.
 
-A portable-settings mode may be added only if it does not cause writes into a read-only install directory or mingle secrets (none expected).
-
-## 11. Release pipeline
-
-1. Freeze requirements and release notes.
-2. Update dependencies and lock files intentionally.
-3. Verify official WavPack artifacts and licenses.
-4. Run formatting/static analysis.
-5. Build Release.
-6. Run all unit/component/integration/end-to-end/corpus tests.
-7. Run clean-VM offline tests.
-8. Run accessibility/manual UX checklist.
-9. Generate package, docs, schemas, SBOM, notices.
-10. Generate checksums after all files are final.
-11. Sign artifacts where available.
-12. Independently verify ZIP/checksums/signature.
-13. Perform emergency plain-`wvunpack` restore from the release package.
-14. Complete acceptance checklist.
-15. Publish immutable release assets and source tag.
-
-## 12. GitHub Pages website
+## 10. Website and release copy
 
 The dependency-free site under `/docs` can be deployed from the repository. It must:
 
 - Match actual release status.
 - Use no trackers, external fonts, or CDNs.
-- Avoid universal compression promises.
+- Sell the space-saving value while avoiding guaranteed compression promises.
 - Link to source, release checksums, docs, and recovery instructions once those exist.
-- Retain an honest pre-alpha banner before software release.
+- Keep "Verified means byte-for-byte restored" precise and prominent.
 
-The provided `.github/workflows/pages.yml` is a starting template and must be reviewed for repository permissions and branch policy.
+## 11. Archiving the project itself
 
-## 13. Installer future
-
-An installer may follow the portable release after design covers:
-
-- Per-user vs per-machine install.
-- Standard-user operation.
-- Upgrade rollback.
-- Uninstall that never touches archive/source/user content.
-- WavPack sidecar location and license visibility.
-- File associations, if any, as opt-in.
-- Code signing and reputation.
-
-The installer must never delete `.wv`, `.wav`, manifests, reports, or user settings without explicit, narrowly scoped consent.
-
-## 14. Archiving the project itself
-
-For long-term recoverability, each stable release should preserve:
-
-- Source archive and Git tag.
-- Complete build documentation.
-- SDK/runtime version information.
-- NuGet packages/lock metadata as licensing permits.
-- Exact WavPack binary/source release and license.
-- Manifest schemas and examples.
-- Test corpus generators and release evidence.
-- Portable binaries and checksums.
-
-Store these in redundant, independently verified locations.
+For long-term recoverability, each stable release should preserve source, build documentation, SDK/runtime version information, NuGet lock metadata, exact WavPack binary/source release and license, manifest schemas/examples, test corpus generators, release evidence, binaries, and checksums.

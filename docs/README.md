@@ -1,6 +1,8 @@
-﻿# WavCrusher `/docs` Site
+# WavCrusher `/docs` Site
 
-This directory is both a dependency-free static marketing site and the main technical-documentation collection.
+This directory is both the dependency-free static marketing site and the main technical-documentation collection for WavCrusher v1.0.0a.
+
+WavCrusher is a local Windows tool for turning large WAV libraries into verified pure-lossless WavPack archives. It is aimed at musicians, collectors, studios, field recordists, archivists, and anyone with a lossless music collection that is too large to keep as raw WAV forever but too valuable to compress carelessly.
 
 ## Preview locally
 
@@ -16,21 +18,30 @@ Then open `http://localhost:8080/`. A local server is preferable to `file://` wh
 
 The site can be published from `/docs` with GitHub Pages or the included Pages workflow. Before public deployment:
 
-- Replace pre-alpha status only when an actual tested release exists.
+- Confirm the displayed release status matches the current build.
 - Add real repository/release links; do not invent them.
 - Run HTML/CSS/JavaScript and accessibility checks.
 - Confirm every relative documentation link resolves.
 - Keep the site free of trackers, remote fonts, CDNs, and third-party scripts.
 - Keep compression figures qualified as estimates.
+- Keep source-retention language conservative: WavCrusher verifies archives; users remain responsible for backups and retention choices.
 
 ## Files
 
-- `index.html` â€” one-page product site.
-- `styles.css` â€” responsive visual design.
-- `app.js` â€” accessible mobile navigation, storage estimator, and reduced-motion-aware reveals.
-- `favicon.svg`, `manifest.webmanifest`, `404.html`, `.nojekyll` â€” deployment support.
-- Markdown files â€” product and engineering documentation.
+- `index.html` - one-page product site.
+- `styles.css` - responsive visual design.
+- `app.js` - storage estimator and progressive enhancement.
+- `favicon.svg`, `manifest.webmanifest`, `404.html`, `.nojekyll` - deployment support.
+- Markdown files - product, user, engineering, safety, release, and recovery documentation.
 
-## Copy rule
+## Current product copy
 
-The website may say that a file marked Verified has passed byte-for-byte restoration **only after the implementation and release tests enforce that state**. Until then, use planned/future language and retain the pre-alpha banner.
+The website may say that a file marked Verified has passed byte-for-byte restoration because the app performs an encode, restore, and complete-file hash comparison before treating an item as successful.
+
+Do not promise universal savings, every WAV variant, future-proof storage, or backup replacement. Preferred wording:
+
+- "Save serious disk space on large WAV collections."
+- "Pure-lossless WavPack archives."
+- "Verified means restored byte-for-byte."
+- "Standard `.wv` files, no proprietary vault."
+- "Local-only: no account, cloud upload, trackers, or telemetry."

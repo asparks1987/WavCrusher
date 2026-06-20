@@ -10,6 +10,8 @@
 
 **Conflict** â€” A condition such as an existing destination or path collision that prevents safe processing without user investigation.
 
+**Compression ratio** - The archive size compared with the original source size. WavCrusher reports this per file so users can see actual storage savings.
+
 **Fixity** â€” Evidence that digital content has not changed, commonly established through cryptographic hashes.
 
 **Hash** â€” A deterministic digest such as SHA-256. It detects changed bytes but does not by itself prove authorship or repair corruption.
@@ -41,6 +43,8 @@
 **WavPack** â€” Open lossless/hybrid audio compression format and toolchain. WavCrusher uses its pure-lossless mode.
 
 **Whole-file lossless** â€” Restoration in which every file-content byte matches, not only decoded audio samples.
+
+**Worker pool** - The bounded set of concurrent archival workers WavCrusher uses to process multiple files at once without launching unbounded WavPack processes.
 
 **`wavpack`** â€” Encoder executable used to create `.wv` files.
 

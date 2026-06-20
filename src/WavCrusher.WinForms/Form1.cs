@@ -99,6 +99,17 @@ public partial class Form1 : Form
         await RunRestoreAsync().ConfigureAwait(true);
     }
 
+    private void ClearButton_Click(object sender, EventArgs e)
+    {
+        ClearCurrentJobState();
+    }
+
+    private void AboutButton_Click(object sender, EventArgs e)
+    {
+        using var dialog = new AboutDialog();
+        dialog.ShowDialog(this);
+    }
+
     private void BrowseSourceButton_Click(object sender, EventArgs e)
     {
         using var dialog = new FolderBrowserDialog
@@ -160,13 +171,16 @@ public partial class Form1 : Form
 
         _rows.Clear();
         _loadedManifest = null;
+        _loadedPackagePath = string.Empty;
         packageSummaryLabel.Text = "No package loaded.";
+        clearButton.Enabled = false;
 
         _operationCancellation = new CancellationTokenSource();
         SetBusy(true);
 
         try
         {
+            InitializeProgressUi(1, "Scanning for WAV files");
             UpdateStatus("Scanning for WAV files...");
             var candidates = await _scanner
                 .ScanAsync(sourceRoot, recursiveCheckBox.Checked, _operationCancellation.Token)
@@ -253,17 +267,25 @@ public partial class Form1 : Form
         try
         {
             Directory.CreateDirectory(archivesRoot);
-            UpdateStatus("Starting archive...");
+            var workerCount = GetArchiveWorkerCount(_rows.Count);
+            InitializeProgressUi(_rows.Count, $"Archive progress ({workerCount} workers)");
+            UpdateStatus($"Starting archive with {workerCount} worker(s)...");
 
-            var manifestItems = new List<TarballManifestItem>(_rows.Count);
+            var rowSnapshot = _rows.ToList();
+            var manifestItems = new TarballManifestItem?[rowSnapshot.Count];
+            var manifestItemTasks = new List<Task<ArchiveWorkOutcome>>(rowSnapshot.Count);
             var processed = 0;
+            using var concurrencyGate = new SemaphoreSlim(workerCount);
 
-            foreach (var row in _rows)
+            for (var rowIndex = 0; rowIndex < rowSnapshot.Count; rowIndex++)
             {
+                var currentIndex = rowIndex;
+                var row = rowSnapshot[currentIndex];
                 _operationCancellation.Token.ThrowIfCancellationRequested();
 
                 row.Status = ArchiveSkippedStatus;
                 row.Message = "Preparing";
+                row.ArchiveLengthBytes = null;
                 filesGrid.Refresh();
 
                 ArchiveItemProgress? lastProgress = null;
@@ -273,92 +295,47 @@ public partial class Form1 : Form
                     row.Status = p.Stage;
                     row.Message = p.Message;
                     filesGrid.Refresh();
+                    UpdateCurrentItemProgressUi(row.RelativePath, p.Stage, true);
                 });
 
-                ArchiveResult result;
-                var rowPackagePath = Path.Combine(
-                    archivesRoot,
-                    TarballPackagePaths.GetArchiveEntryPath(row.RelativePath).Replace('/', Path.DirectorySeparatorChar));
-
-                Directory.CreateDirectory(Path.GetDirectoryName(rowPackagePath)!);
-                var startedUtc = DateTime.UtcNow;
-
-                try
+                manifestItemTasks.Add(Task.Run(async () =>
                 {
-                    result = await _compressor
-                        .CompressAsync(new ArchiveRequest(row.Id, row.FullPath, rowPackagePath), progress, _operationCancellation.Token)
-                        .ConfigureAwait(true);
-                }
-                catch (OperationCanceledException)
-                {
-                    row.Status = ArchiveCancelledStatus;
-                    row.Message = "Canceled by user.";
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    result = new ArchiveResult(
-                        row.Id,
-                        row.FullPath,
-                        rowPackagePath,
-                        Succeeded: false,
-                        Status: ArchiveFailedStatus,
-                        Message: ex.Message,
-                        SourceSha256: null,
-                        RestoredSha256: null,
-                        ArchiveSha256: null);
-                }
-
-                if (result.SourceSha256 is null)
-                {
-                    result = result with
+                    await concurrencyGate.WaitAsync(_operationCancellation.Token).ConfigureAwait(false);
+                    try
                     {
-                        SourceSha256 = await ComputeSha256Async(row.FullPath, _operationCancellation.Token).ConfigureAwait(true)
-                    };
-                }
-
-                var sourceSha256 = result.SourceSha256!;
-
-                var status = result.Status;
-                if (!string.Equals(status, ArchiveCompletedStatus, StringComparison.OrdinalIgnoreCase))
-                {
-                    status = result.Status;
-                }
-
-                var archiveLength = File.Exists(rowPackagePath) ? new FileInfo(rowPackagePath).Length : 0;
-                manifestItems.Add(
-                    new TarballManifestItem(
-                        SourceRelativePath: row.RelativePath,
-                        SourceAbsolutePathHint: row.FullPath,
-                        SourceLengthBytes: row.LengthBytes,
-                        SourceSha256: new HashReference("sha256", sourceSha256),
-                        ArchiveRelativePath: TarballPackagePaths.GetArchiveEntryPath(row.RelativePath),
-                        ArchiveLengthBytes: archiveLength,
-                        ArchiveSha256: result.ArchiveSha256 is null ? null : new HashReference("sha256", result.ArchiveSha256),
-                        RestoredSha256: result.RestoredSha256 is null ? null : new HashReference("sha256", result.RestoredSha256),
-                        ProfileId: "wavpack-pure-lossless-hh-x6-v1",
-                        Status: status,
-                        FailureCode: string.Equals(status, ArchiveCompletedStatus, StringComparison.OrdinalIgnoreCase) ? null : status,
-                        Message: result.Message,
-                        StartedUtc: startedUtc.ToString("O"),
-                        CompletedUtc: DateTime.UtcNow.ToString("O")));
-
-                row.ArchiveRelativePath = TarballPackagePaths.GetArchiveEntryPath(row.RelativePath);
-                row.Status = status;
-                row.Message = result.Message;
-
-                processed++;
-                if (lastProgress is not null)
-                {
-                    UpdateStatus($"{lastProgress.Stage}: {row.RelativePath}");
-                }
-                else
-                {
-                    UpdateStatus($"Archived {processed:N0}/{_rows.Count:N0} item(s).");
-                }
+                        return await ArchiveRowAsync(currentIndex, row, archivesRoot, progress, _operationCancellation.Token).ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        concurrencyGate.Release();
+                    }
+                }, _operationCancellation.Token));
             }
 
-            var manifest = BuildManifest(manifestItems, packageId, roots.SourceRoot.Value);
+            while (manifestItemTasks.Count > 0)
+            {
+                _operationCancellation.Token.ThrowIfCancellationRequested();
+
+                var completedTask = await Task.WhenAny(manifestItemTasks).ConfigureAwait(true);
+                manifestItemTasks.Remove(completedTask);
+
+                var outcome = await completedTask.ConfigureAwait(true);
+                manifestItems[outcome.RowIndex] = outcome.ManifestItem;
+
+                outcome.Row.ArchiveRelativePath = outcome.ManifestItem.ArchiveRelativePath;
+                outcome.Row.ArchiveLengthBytes = outcome.ArchiveLengthBytes;
+                outcome.Row.OriginalLocation = outcome.Row.FullPath;
+                outcome.Row.Status = outcome.Status;
+                outcome.Row.Message = outcome.Message;
+                filesGrid.Refresh();
+
+                processed++;
+                UpdateOverallProgressUi(processed, rowSnapshot.Count, $"Archived {processed:N0}/{rowSnapshot.Count:N0} item(s).");
+                UpdateCurrentItemProgressUi(outcome.Row.RelativePath, outcome.Status, false);
+                UpdateStatus($"{outcome.Status}: {outcome.Row.RelativePath}");
+            }
+
+            var manifest = BuildManifest(manifestItems.Where(item => item is not null).Select(item => item!).ToList(), packageId, roots.SourceRoot.Value);
             var manifestJson = JsonSerializer.Serialize(manifest, ManifestJsonOptions);
             await File.WriteAllTextAsync(stagedManifestPath, manifestJson, Encoding.UTF8, _operationCancellation.Token).ConfigureAwait(true);
 
@@ -395,6 +372,7 @@ public partial class Form1 : Form
         }
         catch (Exception ex)
         {
+            _operationCancellation?.Cancel();
             MessageBox.Show(this, ex.Message, "Archive failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             UpdateStatus($"Archive failed: {ex.Message}");
         }
@@ -419,6 +397,7 @@ public partial class Form1 : Form
                 File.Delete(tarPath);
             }
 
+            ResetProgressUi();
             archiveButton.Enabled = _rows.Count > 0;
         }
     }
@@ -436,6 +415,7 @@ public partial class Form1 : Form
 
         try
         {
+            InitializeProgressUi(1, "Loading package");
             _rows.Clear();
             if (!string.IsNullOrWhiteSpace(_loadedPackageStagingRoot) && Directory.Exists(_loadedPackageStagingRoot))
             {
@@ -490,9 +470,11 @@ public partial class Form1 : Form
                     item.Status,
                     item.Message,
                     item.SourceAbsolutePathHint,
-                    item.ArchiveRelativePath));
+                    item.ArchiveRelativePath,
+                    item.ArchiveLengthBytes));
             }
 
+            ResetProgressUi();
             restoreButton.Enabled = _rows.Count > 0;
             UpdateStatus($"Loaded package with {manifest.Items.Count:N0} item(s).");
         }
@@ -578,6 +560,7 @@ public partial class Form1 : Form
         SetBusy(true);
         try
         {
+            InitializeProgressUi(_loadedManifest.Items.Count, mode == RestoreMode.OriginalLocations ? "Restore progress (original locations)" : "Restore progress");
             var restoredCount = 0;
             var verifiedCount = 0;
             var conflictCount = 0;
@@ -597,6 +580,7 @@ public partial class Form1 : Form
                 row.Status = ArchiveSkippedStatus;
                 row.Message = "Preparing restore";
                 filesGrid.Refresh();
+                UpdateCurrentItemProgressUi(row.RelativePath, "Preparing restore", true);
 
                 if (!IsVerifiedManifestItem(item))
                 {
@@ -604,6 +588,7 @@ public partial class Form1 : Form
                     row.Message = "Item is not verified in manifest.";
                     failedCount++;
                     completedItems++;
+                    UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     UpdateStatus($"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     continue;
                 }
@@ -614,6 +599,7 @@ public partial class Form1 : Form
                     row.Message = "Unsafe manifest archive path.";
                     failedCount++;
                     completedItems++;
+                    UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     continue;
                 }
 
@@ -623,19 +609,19 @@ public partial class Form1 : Form
                     row.Message = "Unsupported source hash algorithm.";
                     failedCount++;
                     completedItems++;
+                    UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     continue;
                 }
 
-                var archiveEntryPath = Path.Combine(
-                    _loadedPackageStagingRoot,
-                    item.ArchiveRelativePath.Replace('/', Path.DirectorySeparatorChar));
+                var archiveEntryPath = ResolveArchiveEntryPath(_loadedPackageStagingRoot, item.ArchiveRelativePath);
 
                 if (!File.Exists(archiveEntryPath))
                 {
                     row.Status = ArchiveFailedStatus;
-                    row.Message = "Compressed file missing from package.";
+                    row.Message = $"Compressed file missing from package: {item.ArchiveRelativePath}";
                     failedCount++;
                     completedItems++;
+                    UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     continue;
                 }
 
@@ -646,6 +632,7 @@ public partial class Form1 : Form
                 {
                     failedCount++;
                     completedItems++;
+                    UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     continue;
                 }
 
@@ -655,10 +642,12 @@ public partial class Form1 : Form
                     row.Message = "Target file already exists.";
                     conflictCount++;
                     completedItems++;
+                    UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     continue;
                 }
 
                 var tempRestorePath = Path.Combine(restoreStaging, $"{Path.GetFileName(archiveEntryPath)}.{Guid.NewGuid():N}.wav");
+                UpdateCurrentItemProgressUi(row.RelativePath, "Decoding restore", true);
                 var decodeResult = await RunWvUnpackAsync(archiveEntryPath, tempRestorePath, _operationCancellation.Token).ConfigureAwait(true);
                 if (!decodeResult.Succeeded || decodeResult.ExitCode != 0)
                 {
@@ -666,6 +655,7 @@ public partial class Form1 : Form
                     row.Message = "Restore decode failed.";
                     failedCount++;
                     completedItems++;
+                    UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     continue;
                 }
 
@@ -675,9 +665,11 @@ public partial class Form1 : Form
                     row.Message = "Restore file was not created.";
                     failedCount++;
                     completedItems++;
+                    UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     continue;
                 }
 
+                UpdateCurrentItemProgressUi(row.RelativePath, "Verifying restored file", true);
                 var restoredHash = await ComputeSha256Async(tempRestorePath, _operationCancellation.Token).ConfigureAwait(true);
                 var restoredLength = new FileInfo(tempRestorePath).Length;
                 if (restoredLength != item.SourceLengthBytes || !string.Equals(restoredHash, item.SourceSha256.Hex, StringComparison.OrdinalIgnoreCase))
@@ -686,9 +678,11 @@ public partial class Form1 : Form
                     row.Message = "Restored content does not match source hash.";
                     failedCount++;
                     completedItems++;
+                    UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restore {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                     continue;
                 }
 
+                UpdateCurrentItemProgressUi(row.RelativePath, "Publishing restored file", true);
                 Directory.CreateDirectory(Path.GetDirectoryName(normalizedTarget)!);
                 File.Copy(tempRestorePath, normalizedTarget, overwrite: false);
 
@@ -697,6 +691,7 @@ public partial class Form1 : Form
                 restoredCount++;
                 verifiedCount++;
                 completedItems++;
+                UpdateOverallProgressUi(completedItems, _loadedManifest.Items.Count, $"Restored {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                 UpdateStatus($"Restored {completedItems:N0}/{_loadedManifest.Items.Count:N0}...");
                 filesGrid.Refresh();
             }
@@ -732,6 +727,7 @@ public partial class Form1 : Form
                 Directory.Delete(restoreStaging, recursive: true);
             }
 
+            ResetProgressUi();
             _operationCancellation?.Dispose();
             _operationCancellation = null;
             SetBusy(false);
@@ -941,6 +937,28 @@ public partial class Form1 : Form
         return Path.Combine(packageStagingRoot, TarballPackagePaths.ManifestFileName);
     }
 
+    private static string ResolveArchiveEntryPath(string packageStagingRoot, string archiveRelativePath)
+    {
+        var normalizedRelativePath = archiveRelativePath.Replace('/', Path.DirectorySeparatorChar);
+        var exactPath = Path.Combine(packageStagingRoot, normalizedRelativePath);
+        if (File.Exists(exactPath))
+        {
+            return exactPath;
+        }
+
+        var expectedTail = Path.DirectorySeparatorChar + normalizedRelativePath;
+        foreach (var candidate in Directory.EnumerateFiles(packageStagingRoot, Path.GetFileName(normalizedRelativePath), SearchOption.AllDirectories))
+        {
+            var fullPath = Path.GetFullPath(candidate);
+            if (fullPath.EndsWith(expectedTail, StringComparison.OrdinalIgnoreCase))
+            {
+                return fullPath;
+            }
+        }
+
+        return exactPath;
+    }
+
     private static bool IsLikelyTarballManifest(string path)
     {
         try
@@ -1050,6 +1068,7 @@ public partial class Form1 : Form
         scanButton.Enabled = !busy;
         archiveButton.Enabled = !busy && _rows.Count > 0;
         restoreButton.Enabled = !busy && _loadedManifest is not null;
+        clearButton.Enabled = !busy && HasCurrentJobState();
         browseSourceButton.Enabled = !busy;
         browseOutputButton.Enabled = !busy;
         browsePackageButton.Enabled = !busy;
@@ -1063,13 +1082,300 @@ public partial class Form1 : Form
         restoreRootTextBox.Enabled = !busy && restoreToFolderRadioButton.Checked;
         cancelButton.Enabled = busy;
         filesGrid.Enabled = !busy;
-        progressBar.Style = busy ? ProgressBarStyle.Marquee : ProgressBarStyle.Blocks;
+        if (!busy)
+        {
+            ResetProgressUi();
+        }
+    }
+
+    private void ClearCurrentJobState()
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(_loadedPackageStagingRoot) && Directory.Exists(_loadedPackageStagingRoot))
+            {
+                Directory.Delete(_loadedPackageStagingRoot, recursive: true);
+            }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+
+        _loadedPackageStagingRoot = string.Empty;
+        _loadedManifest = null;
+        _loadedPackagePath = string.Empty;
+        _rows.Clear();
+        restoreToFolderRadioButton.Checked = true;
+        UpdateModeControls();
+
+        sourcePathTextBox.Clear();
+        outputPathTextBox.Clear();
+        packagePathTextBox.Clear();
+        restoreRootTextBox.Clear();
+        recursiveCheckBox.Checked = true;
+        packageSummaryLabel.Text = "No package loaded.";
+        ResetProgressUi();
+        UpdateStatus("Job state cleared. Ready for another run.");
+
+        archiveButton.Enabled = false;
+        restoreButton.Enabled = false;
+        clearButton.Enabled = false;
+    }
+
+    private bool HasCurrentJobState() =>
+        _loadedManifest is not null
+        || _rows.Count > 0
+        || !string.IsNullOrWhiteSpace(packagePathTextBox.Text)
+        || !string.IsNullOrWhiteSpace(restoreRootTextBox.Text)
+        || !string.IsNullOrWhiteSpace(_loadedPackageStagingRoot);
+
+    private void InitializeProgressUi(int totalItems, string summaryText)
+    {
+        progressSummaryLabel.Text = summaryText;
+        itemProgressLabel.Text = "Current item";
+        progressBar.Minimum = 0;
+        progressBar.Maximum = Math.Max(totalItems, 1);
+        progressBar.Value = 0;
+        progressBar.Style = ProgressBarStyle.Continuous;
+        itemProgressBar.Style = ProgressBarStyle.Marquee;
+        itemProgressBar.MarqueeAnimationSpeed = 30;
+        itemProgressBar.Value = 0;
+        statusLabel.Text = summaryText;
+        statusLabel.AccessibleDescription = summaryText;
+    }
+
+    private void UpdateOverallProgressUi(int completedItems, int totalItems, string summaryText)
+    {
+        progressSummaryLabel.Text = summaryText;
+        progressBar.Maximum = Math.Max(totalItems, 1);
+        progressBar.Value = Math.Min(Math.Max(completedItems, 0), progressBar.Maximum);
+    }
+
+    private void UpdateCurrentItemProgressUi(string itemText, string stageText, bool active)
+    {
+        itemProgressLabel.Text = $"{stageText}: {itemText}";
+        itemProgressBar.Style = active ? ProgressBarStyle.Marquee : ProgressBarStyle.Blocks;
+        itemProgressBar.MarqueeAnimationSpeed = active ? 30 : 0;
+    }
+
+    private void ResetProgressUi()
+    {
+        progressSummaryLabel.Text = "Overall progress";
+        itemProgressLabel.Text = "Current item";
+        progressBar.Minimum = 0;
+        progressBar.Maximum = 1;
+        progressBar.Value = 0;
+        progressBar.Style = ProgressBarStyle.Blocks;
+        itemProgressBar.Minimum = 0;
+        itemProgressBar.Maximum = 1;
+        itemProgressBar.Value = 0;
+        itemProgressBar.Style = ProgressBarStyle.Blocks;
+        itemProgressBar.MarqueeAnimationSpeed = 0;
     }
 
     private void UpdateStatus(string message)
     {
         statusLabel.Text = message;
         statusLabel.AccessibleDescription = message;
+    }
+
+    private async Task<ArchiveWorkOutcome> ArchiveRowAsync(
+        int rowIndex,
+        ArchiveRow row,
+        string archivesRoot,
+        IProgress<ArchiveItemProgress>? progress,
+        CancellationToken cancellationToken)
+    {
+        var startedUtc = DateTime.UtcNow;
+        var rowPackagePath = Path.Combine(
+            archivesRoot,
+            TarballPackagePaths.GetArchiveEntryPath(row.RelativePath).Replace('/', Path.DirectorySeparatorChar));
+
+        Directory.CreateDirectory(Path.GetDirectoryName(rowPackagePath)!);
+
+        ArchiveResult result;
+        try
+        {
+            result = await _compressor
+                .CompressAsync(new ArchiveRequest(row.Id, row.FullPath, rowPackagePath), progress, cancellationToken)
+                .ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
+            row.Status = ArchiveCancelledStatus;
+            row.Message = "Canceled by user.";
+            throw;
+        }
+        catch (Exception ex)
+        {
+            result = new ArchiveResult(
+                row.Id,
+                row.FullPath,
+                rowPackagePath,
+                Succeeded: false,
+                Status: ArchiveFailedStatus,
+                Message: ex.Message,
+                SourceSha256: null,
+                RestoredSha256: null,
+                ArchiveSha256: null);
+        }
+
+        if (result.SourceSha256 is null)
+        {
+            result = result with
+            {
+                SourceSha256 = await ComputeSha256Async(row.FullPath, cancellationToken).ConfigureAwait(true)
+            };
+        }
+
+        var sourceSha256 = result.SourceSha256!;
+        var archiveLength = File.Exists(rowPackagePath) ? new FileInfo(rowPackagePath).Length : 0;
+        var status = result.Status;
+        var completedUtc = DateTime.UtcNow;
+        var manifestItem = new TarballManifestItem(
+            SourceRelativePath: row.RelativePath,
+            SourceAbsolutePathHint: row.FullPath,
+            SourceLengthBytes: row.LengthBytes,
+            SourceSha256: new HashReference("sha256", sourceSha256),
+            ArchiveRelativePath: TarballPackagePaths.GetArchiveEntryPath(row.RelativePath),
+            ArchiveLengthBytes: archiveLength,
+            ArchiveSha256: result.ArchiveSha256 is null ? null : new HashReference("sha256", result.ArchiveSha256),
+            RestoredSha256: result.RestoredSha256 is null ? null : new HashReference("sha256", result.RestoredSha256),
+            ProfileId: "wavpack-pure-lossless-hh-x6-v1",
+            Status: status,
+            FailureCode: string.Equals(status, ArchiveCompletedStatus, StringComparison.OrdinalIgnoreCase) ? null : status,
+            Message: result.Message,
+            StartedUtc: startedUtc.ToString("O"),
+            CompletedUtc: completedUtc.ToString("O"));
+
+        return new ArchiveWorkOutcome(
+            rowIndex,
+            row,
+            rowPackagePath,
+            archiveLength,
+            manifestItem,
+            status,
+            result.Message);
+    }
+
+    private static int GetArchiveWorkerCount(int itemCount) =>
+        Math.Max(1, Math.Min(Environment.ProcessorCount, itemCount));
+
+    private sealed class AboutDialog : Form
+    {
+        public AboutDialog()
+        {
+            Text = "About WavCrusher";
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            StartPosition = FormStartPosition.CenterParent;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            ShowInTaskbar = false;
+            ClientSize = new Size(640, 420);
+
+            var titleLabel = new Label
+            {
+                Text = "WavCrusher",
+                Font = new Font(Font, FontStyle.Bold),
+                AutoSize = true,
+                Dock = DockStyle.Top
+            };
+
+            var authorLabel = new Label
+            {
+                Text = "Developer: Aryn Mikel Sparks",
+                AutoSize = true,
+                Dock = DockStyle.Top
+            };
+
+            var emailLabel = new Label
+            {
+                Text = "Email: Aryn.sparks1987@gmail.com",
+                AutoSize = true,
+                Dock = DockStyle.Top
+            };
+
+            var licenseLabel = new Label
+            {
+                Text = "License: MIT",
+                AutoSize = true,
+                Dock = DockStyle.Top
+            };
+
+            var descriptionLabel = new Label
+            {
+                Text = "WavCrusher archives WAV files as verified pure-lossless WavPack .wv files and keeps source WAVs intact.",
+                AutoSize = false,
+                Dock = DockStyle.Top,
+                Height = 44
+            };
+
+            var licenseTextBox = new TextBox
+            {
+                Multiline = true,
+                ReadOnly = true,
+                ScrollBars = ScrollBars.Vertical,
+                Dock = DockStyle.Fill,
+                Text =
+                    "MIT License\r\n\r\n" +
+                    "Copyright (c) 2026 WavCrusher contributors\r\n\r\n" +
+                    "Permission is hereby granted, free of charge, to any person obtaining a copy\r\n" +
+                    "of this software and associated documentation files (the \"Software\"), to deal\r\n" +
+                    "in the Software without restriction, including without limitation the rights\r\n" +
+                    "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\r\n" +
+                    "copies of the Software, and to permit persons to whom the Software is\r\n" +
+                    "furnished to do so, subject to the following conditions:\r\n\r\n" +
+                    "The above copyright notice and this permission notice shall be included in all\r\n" +
+                    "copies or substantial portions of the Software.\r\n\r\n" +
+                    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\r\n" +
+                    "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\r\n" +
+                    "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\r\n" +
+                    "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\r\n" +
+                    "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\r\n" +
+                    "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\r\n" +
+                    "SOFTWARE."
+            };
+
+            var closeButton = new Button
+            {
+                Text = "Close",
+                AutoSize = true,
+                Dock = DockStyle.Right,
+                DialogResult = DialogResult.OK
+            };
+
+            var buttonPanel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.RightToLeft,
+                Dock = DockStyle.Bottom,
+                Padding = new Padding(0, 12, 0, 0),
+                Height = 44,
+                WrapContents = false
+            };
+            buttonPanel.Controls.Add(closeButton);
+
+            var headerPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Padding = new Padding(0, 0, 0, 12),
+                Height = 120
+            };
+            headerPanel.Controls.Add(licenseLabel);
+            headerPanel.Controls.Add(emailLabel);
+            headerPanel.Controls.Add(authorLabel);
+            headerPanel.Controls.Add(titleLabel);
+            headerPanel.Controls.Add(descriptionLabel);
+
+            AcceptButton = closeButton;
+            CancelButton = closeButton;
+
+            Controls.Add(licenseTextBox);
+            Controls.Add(buttonPanel);
+            Controls.Add(headerPanel);
+        }
     }
 
     private sealed class ArchiveRow
@@ -1082,7 +1388,8 @@ public partial class Form1 : Form
             string status,
             string message,
             string sourceAbsoluteHint,
-            string? archiveRelativePath)
+            string? archiveRelativePath,
+            long? archiveLengthBytes)
         {
             Id = id;
             RelativePath = relativePath;
@@ -1092,6 +1399,8 @@ public partial class Form1 : Form
             Message = message;
             SourceAbsoluteHint = sourceAbsoluteHint;
             ArchiveRelativePath = archiveRelativePath;
+            OriginalLocation = sourceAbsoluteHint;
+            ArchiveLengthBytes = archiveLengthBytes;
         }
 
         public Guid Id { get; private init; }
@@ -1108,7 +1417,15 @@ public partial class Form1 : Form
 
         public string SourceAbsoluteHint { get; private init; }
 
+        public string OriginalLocation { get; set; }
+
         public string? ArchiveRelativePath { get; set; }
+
+        public long? ArchiveLengthBytes { get; set; }
+
+        public string CompressionRatioText => ArchiveLengthBytes is long archiveLength
+            ? FormatCompressionRatio(archiveLength, LengthBytes)
+            : "n/a";
 
         public static ArchiveRow FromCandidate(WaveFileCandidate candidate) => new(
             candidate.Id,
@@ -1118,8 +1435,29 @@ public partial class Form1 : Form
             "Ready",
             string.Empty,
             candidate.FullPath,
+            null,
             null);
+
+        private static string FormatCompressionRatio(long archiveLengthBytes, long sourceLengthBytes)
+        {
+            if (sourceLengthBytes <= 0)
+            {
+                return "n/a";
+            }
+
+            var ratio = (double)archiveLengthBytes / sourceLengthBytes;
+            return $"{ratio:P1}";
+        }
     }
+
+    private sealed record ArchiveWorkOutcome(
+        int RowIndex,
+        ArchiveRow Row,
+        string RowPackagePath,
+        long ArchiveLengthBytes,
+        TarballManifestItem ManifestItem,
+        string Status,
+        string Message);
 
     private sealed record ProcessOutcome(int ExitCode, bool Succeeded, string Diagnostics, TimeSpan Duration);
 }
