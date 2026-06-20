@@ -20,7 +20,6 @@
       <a href="#fit">Who it helps</a>
       <a href="#features">Features</a>
       <a href="#proof">Proof</a>
-      <a href="#estimate">Estimator</a>
       <a href="USER_GUIDE.md">Guide</a>
     </nav>
   </header>
@@ -91,40 +90,6 @@
         <article><span>04</span><h3>Compare whole-file SHA-256</h3><p>Only matching length and full-file hash allow the item to become Verified.</p></article>
       </div>
     </section>
-    <section class="section split">
-      <div>
-        <p class="eyebrow dark">Local and understandable</p>
-        <h2>No account. No tracker. No proprietary vault.</h2>
-        <p>WavCrusher runs locally, writes ordinary WavPack files, and keeps human-readable documentation nearby. If the app is not available someday, standard `wvunpack` can still recover the audio.</p>
-      </div>
-      <ol class="timeline">
-        <li><strong>Archive</strong><span>Scan a source root, preflight conflicts, encode, verify, publish, and report results.</span></li>
-        <li><strong>Audit</strong><span>Recheck archive hashes and decoder integrity without modifying source or archive files.</span></li>
-        <li><strong>Restore</strong><span>Recreate WAV files and compare against archive-time hashes.</span></li>
-      </ol>
-    </section>
-    <section id="estimate" class="section estimator-section">
-      <div class="estimator-copy">
-        <p class="eyebrow">Storage planning</p>
-        <h2>Estimate what you could reclaim.</h2>
-        <p>Actual compression depends on the audio, but this gives a quick feel for why archiving WAVs can be worth it. WavCrusher reports real per-file ratios after processing.</p>
-      </div>
-      <form class="estimator" data-estimator>
-        <label>WAV collection size<span class="input-row"><input id="library-size" type="number" min="0" step="0.1" value="2.5" inputmode="decimal"><select id="library-unit" aria-label="Size unit"><option value="GB">GB</option><option value="TB" selected>TB</option></select></span></label>
-        <label>Estimated final size: <output id="ratio-output" for="ratio">50%</output><input id="ratio" type="range" min="30" max="70" value="50"></label>
-        <div class="estimate-output" aria-live="polite"><div><span>Archive</span><strong id="archive-size">1.25 TB</strong></div><div><span>Saved</span><strong id="saved-size">1.25 TB</strong></div></div>
-      </form>
-    </section>
-    <section class="section recovery">
-      <div>
-        <p class="eyebrow dark">Emergency recovery</p>
-        <h2>Your files are not trapped inside WavCrusher.</h2>
-        <p>Each archive is a standard `.wv` file. Keep the manifest and WavPack sidecars with your archive set, and you can recover WAVs with plain command-line tools.</p>
-      </div>
-      <pre aria-label="PowerShell recovery command"><code>PS&gt; .\wvunpack.exe "E:\Archive\Session\Mix.wv" "D:\Recovered\Session\Mix.wav"
-PS&gt; Get-FileHash "D:\Recovered\Session\Mix.wav" -Algorithm SHA256</code></pre>
-    </section>
   </main>
-  <footer><strong>WavCrusher</strong><span>Verified pure-lossless WAV archiving. No accounts, telemetry, remote fonts, or third-party scripts.</span><a href="FAQ.md">FAQ</a></footer>
 </body>
 </html>
