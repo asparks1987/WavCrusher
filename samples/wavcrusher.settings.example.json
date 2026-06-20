@@ -1,0 +1,20 @@
+﻿{
+  "$comment": "Illustrative settings only. Dangerous codec/source/overwrite options are intentionally absent.",
+  "format": "wavcrusher-settings",
+  "version": "1.0",
+  "workerCount": 1,
+  "reportRedaction": "absolute-roots",
+  "temporaryWorkspace": {
+    "policy": "destination-when-possible",
+    "customRoot": null
+  },
+  "ui": {
+    "rememberWindowBounds": true,
+    "lastWorkspace": "archive"
+  },
+  "lastLocations": {
+    "sourceRoot": null,
+    "archiveRoot": null,
+    "restoreRoot": null
+  }
+}

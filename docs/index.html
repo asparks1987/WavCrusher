@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="WavCrusher archives large WAV collections into verified pure-lossless WavPack files for recordings you need to preserve, not play every day.">
+  <meta name="theme-color" content="#121816">
+  <title>WavCrusher - Verified WAV archiving</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" href="assets/wavcrusher-archive-workstation.png" as="image">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="WavCrusher home"><span class="brand-mark" aria-hidden="true">W</span><span>WavCrusher</span></a>
+    <nav aria-label="Primary">
+      <a href="#fit">Use case</a>
+      <a href="#proof">Proof</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#estimate">Estimator</a>
+      <a href="ARCHIVE_SAFETY_SPEC.md">Safety spec</a>
+    </nav>
+  </header>
+  <main id="main">
+    <section id="top" class="hero">
+      <img class="hero-image" src="assets/wavcrusher-archive-workstation.png" alt="Studio archive workstation with drives, waveform sheets, and verified archive blocks">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="eyebrow">Local Windows archiving for cold WAV libraries</p>
+        <h1>WavCrusher</h1>
+        <p class="lede">Turn huge folders of WAV masters, stems, field recordings, and preservation copies into standard lossless WavPack archives when they do not need to be played regularly.</p>
+        <div class="actions">
+          <a class="button primary" href="../README.md">Read the project brief</a>
+          <a class="button secondary" href="PRODUCT_REQUIREMENTS.md">Review requirements</a>
+        </div>
+        <dl class="promise-grid" aria-label="Core promises">
+          <div><dt>Source files</dt><dd>Read-only, never deleted</dd></div>
+          <div><dt>Archive format</dt><dd>Standard .wv files</dd></div>
+          <div><dt>Verified means</dt><dd>Byte-for-byte restored WAV</dd></div>
+        </dl>
+      </div>
+    </section>
+    <section id="fit" class="section split">
+      <div>
+        <p class="eyebrow dark">Made for the shelf, not the session</p>
+        <h2>Keep the masters. Reclaim the space.</h2>
+        <p>WAV is dependable, but uncompressed audio eats disks quickly. WavCrusher is for collections you still value but rarely open: completed album sessions, client handoff folders, oral histories, field-recording dumps, sample-library source material, and safety copies.</p>
+      </div>
+      <div class="list-panel">
+        <h3>Good fit</h3>
+        <ul>
+          <li>Large WAV trees that should stay recoverable for years.</li>
+          <li>Projects where metadata chunks and wrapper bytes matter.</li>
+          <li>Offline archives that need manifests and audit evidence.</li>
+        </ul>
+        <h3>Not the job</h3>
+        <ul>
+          <li>Active DAW sessions that need instant playback.</li>
+          <li>Lossy delivery copies or streaming transcodes.</li>
+          <li>A replacement for backups in multiple locations.</li>
+        </ul>
+      </div>
+    </section>
+    <section id="proof" class="section proof-band">
+      <div class="section-heading">
+        <p class="eyebrow">Lossless with receipts</p>
+        <h2>Every Verified item has to survive a real restore.</h2>
+      </div>
+      <div class="proof-grid">
+        <article><span>01</span><h3>Hash the original WAV</h3><p>WavCrusher streams SHA-256 over the full source file, not only decoded samples.</p></article>
+        <article><span>02</span><h3>Encode to a temporary archive</h3><p>The pinned WavPack encoder writes a non-final .partial file with no overwrite behavior.</p></article>
+        <article><span>03</span><h3>Decode in scratch space</h3><p>The temporary .wv is restored with wvunpack, away from the source and final archive trees.</p></article>
+        <article><span>04</span><h3>Compare whole-file SHA-256</h3><p>Only a matching length and full-file hash allows final publication as a .wv archive.</p></article>
+      </div>
+    </section>
+    <section id="workflow" class="section split">
+      <div>
+        <p class="eyebrow dark">Three practical workflows</p>
+        <h2>Archive, audit, restore.</h2>
+        <p>The archive is useful only if you can keep proving it. WavCrusher's version 1 design includes creation, later audit checks, and restore workflows that write clear reports instead of optimistic success banners.</p>
+      </div>
+      <ol class="timeline">
+        <li><strong>Archive</strong><span>Scan a source root, preflight conflicts, encode, verify, publish, and journal results.</span></li>
+        <li><strong>Audit</strong><span>Recheck archive hashes and decoder integrity without modifying source or archive files.</span></li>
+        <li><strong>Restore</strong><span>Recreate WAV files under a separate root and compare against archive-time hashes.</span></li>
+      </ol>
+    </section>
+    <section id="estimate" class="section estimator-section">
+      <div class="estimator-copy">
+        <p class="eyebrow">Storage planning</p>
+        <h2>Estimate the archive footprint.</h2>
+        <p>Actual compression depends on the audio. Use this as a planning aid, then test representative material before moving a large collection.</p>
+      </div>
+      <form class="estimator" data-estimator>
+        <label>WAV collection size<span class="input-row"><input id="library-size" type="number" min="0" step="0.1" value="2.5" inputmode="decimal"><select id="library-unit" aria-label="Size unit"><option value="GB">GB</option><option value="TB" selected>TB</option></select></span></label>
+        <label>Estimated final size: <output id="ratio-output" for="ratio">50%</output><input id="ratio" type="range" min="30" max="70" value="50"></label>
+        <div class="estimate-output" aria-live="polite"><div><span>Archive</span><strong id="archive-size">1.25 TB</strong></div><div><span>Saved</span><strong id="saved-size">1.25 TB</strong></div></div>
+      </form>
+    </section>
+    <section class="section recovery">
+      <div>
+        <p class="eyebrow dark">No private vault</p>
+        <h2>Plain WavPack recovery stays available.</h2>
+        <p>WavCrusher writes ordinary .wv files and documents the bundled tool identity. The app should make archiving easier, but it must not be required to get your WAVs back.</p>
+      </div>
+      <pre aria-label="PowerShell recovery command"><code>PS&gt; .\wvunpack.exe "E:\Archive\Session\Mix.wv" "D:\Recovered\Session\Mix.wav"
+PS&gt; Get-FileHash "D:\Recovered\Session\Mix.wav" -Algorithm SHA256</code></pre>
+    </section>
+  </main>
+  <footer><strong>WavCrusher</strong><span>Verified lossless WAV archiving. No accounts, telemetry, remote fonts, or third-party scripts.</span><a href="../CODEX_BUILD_PLAN.md">Build plan</a></footer>
+</body>
+</html>

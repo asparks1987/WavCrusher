@@ -1,0 +1,42 @@
+﻿{
+  "$comment": "Example report only. All paths and hashes are synthetic.",
+  "format": "wavcrusher-operation-report",
+  "version": "1.0",
+  "operationId": "80636c48-668b-4eac-9864-e5ac52c3f22c",
+  "operationType": "archive",
+  "status": "completed-with-issues",
+  "startedUtc": "2026-06-19T18:30:00Z",
+  "completedUtc": "2026-06-19T19:00:00Z",
+  "profileId": "wavpack-pure-lossless-hh-x6-v1",
+  "redaction": {
+    "absoluteRootsRedacted": true
+  },
+  "summary": {
+    "planned": 4,
+    "verified": 2,
+    "failed": 1,
+    "conflict": 1,
+    "skipped": 0,
+    "cancelled": 0,
+    "sourceBytes": 408000000,
+    "archiveBytesForVerifiedItems": 211000000,
+    "verifiedCompressionRatio": 0.5172
+  },
+  "issues": [
+    {
+      "relativePath": "Session/Still Recording.wav",
+      "status": "failed",
+      "failureCode": "SourceChanged",
+      "stage": "encoding",
+      "message": "The source changed while it was being archived. Stop the recording/editor and scan again."
+    },
+    {
+      "relativePath": "Session/Existing Mix.wav",
+      "status": "conflict",
+      "failureCode": "DestinationConflict",
+      "stage": "preflight",
+      "message": "The planned archive already exists and was not overwritten."
+    }
+  ],
+  "claim": "Only items counted as verified completed encoder verification and a whole-file SHA-256 extraction round trip."
+}

@@ -1,0 +1,44 @@
+name: Feature request
+description: Propose a scoped feature with preservation and testing impact.
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Describe the preservation/workflow problem, not only the desired control.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Non-goals
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety and recovery impact
+      description: Consider source immutability, path containment, overwrite, verification, manifest compatibility, and open recovery.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Acceptance tests
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundary acknowledgement
+      options:
+        - label: I understand that source deletion, overwrite, lossy/hybrid options, free-form codec arguments, network code, or reparse following require an ADR and separate threat review.
+          required: true

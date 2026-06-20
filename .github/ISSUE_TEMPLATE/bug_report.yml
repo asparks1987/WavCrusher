@@ -1,0 +1,69 @@
+﻿name: Bug report
+description: Report reproducible incorrect behavior. Use the security process for data-safety vulnerabilities.
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not upload private recordings. Prefer a generated/minimal fixture and redact absolute paths.
+  - type: input
+    id: version
+    attributes:
+      label: WavCrusher version or commit
+      placeholder: 1.0.0 / commit SHA
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and architecture
+    validations:
+      required: true
+  - type: input
+    id: wavpack
+    attributes:
+      label: WavPack reported version and hash status
+    validations:
+      required: true
+  - type: dropdown
+    id: workflow
+    attributes:
+      label: Workflow
+      options: [Archive, Audit, Restore, Scan/plan, Resume, Packaging/startup, Website/docs, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include failure code/stage and whether source or archive bytes changed.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Minimal reproduction
+      placeholder: Numbered steps with a synthetic fixture when possible.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Redacted diagnostics
+      description: Paste bounded report/journal text; remove sensitive absolute paths and names.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Data-safety check
+      options:
+        - label: I verified whether the source file/folder changed and stated the result above.
+          required: true
+        - label: I did not attach private or copyrighted audio unnecessarily.
+          required: true

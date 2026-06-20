@@ -1,0 +1,45 @@
+﻿name: CI (implementation template)
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+      - name: Verify dependency metadata
+        shell: pwsh
+        run: |
+          # Replace with the repository's reviewed verifier.
+          if (Test-Path tools/Verify-Dependencies.ps1) {
+            ./tools/Verify-Dependencies.ps1
+          } else {
+            Write-Error "Dependency verifier is not implemented."
+          }
+      - name: Restore
+        run: dotnet restore WavCrusher.sln --locked-mode
+      - name: Format
+        run: dotnet format WavCrusher.sln --verify-no-changes --no-restore
+      - name: Build
+        run: dotnet build WavCrusher.sln -c Release --no-restore
+      - name: Unit and component tests
+        run: dotnet test WavCrusher.sln -c Release --no-build --logger "trx;LogFileName=tests.trx"
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/TestResults/**"
+
+# Add a separate, reviewed real-WavPack/corpus job once official binaries and hashes
+# are pinned. Do not download and execute an unverified latest release in CI.

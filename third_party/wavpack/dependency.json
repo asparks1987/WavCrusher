@@ -1,0 +1,44 @@
+{
+  "name": "WavPack command-line tools",
+  "version": "5.9.0",
+  "source": {
+    "project": "https://github.com/dbry/WavPack",
+    "releaseTag": "5.9.0",
+    "assetName": "wavpack-5.9.0-x64.zip",
+    "url": "https://github.com/dbry/WavPack/releases/download/5.9.0/wavpack-5.9.0-x64.zip",
+    "sha256": {
+      "algorithm": "sha256",
+      "hex": "ad5e94bcde6f4edfc859210d98f144f225805a391c633c68f6dbb15a9e52570e"
+    },
+    "sizeBytes": 426226
+  },
+  "tools": [
+    {
+      "name": "wavpack.exe",
+      "relativePath": "win-x64/wavpack.exe",
+      "reportedVersion": "wavpack 5.9.0; libwavpack 5.9.0",
+      "sha256": {
+        "algorithm": "sha256",
+        "hex": "e26ad2ed3c8e417bd62e0b8eb4ee9b9e2f261a859c9cc18c99026e2b7f8fc661"
+      },
+      "sizeBytes": 321536
+    },
+    {
+      "name": "wvunpack.exe",
+      "relativePath": "win-x64/wvunpack.exe",
+      "reportedVersion": "wvunpack 5.9.0; libwavpack 5.9.0",
+      "sha256": {
+        "algorithm": "sha256",
+        "hex": "9ed083b1c80392e1035125d1576c39151079ff160fb6bf7635e782186c11aae7"
+      },
+      "sizeBytes": 185856
+    }
+  ],
+  "license": {
+    "relativePath": "LICENSE",
+    "sha256": {
+      "algorithm": "sha256",
+      "hex": "9631247606e016bd46fb8109c98dfc3af6374d5ab6ca76d8b7ca46e2ec7334c8"
+    }
+  }
+}

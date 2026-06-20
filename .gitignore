@@ -1,0 +1,26 @@
+﻿# .NET
+bin/
+obj/
+artifacts/
+TestResults/
+*.user
+*.suo
+.vs/
+
+# IDE/editor
+.idea/
+.vscode/*.log
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Local dependencies and generated corpus
+third_party/wavpack/downloads/
+tests/corpus/generated/
+artifacts/
+
+# Local operation artifacts
+*.partial.wv
+*.wavcrusher-partial*

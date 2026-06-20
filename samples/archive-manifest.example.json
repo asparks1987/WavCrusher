@@ -1,0 +1,130 @@
+﻿{
+  "$comment": "Example only. Hashes are synthetic and must never be treated as release evidence.",
+  "format": "wavcrusher-archive-manifest",
+  "version": "1.0",
+  "createdUtc": "2026-06-19T18:30:00Z",
+  "updatedUtc": "2026-06-19T18:35:12Z",
+  "archiveSetId": "7f20368a-97dc-49ad-982e-232a3a2995a0",
+  "generator": {
+    "name": "WavCrusher",
+    "version": "0.1.0-prealpha-example",
+    "runtime": ".NET 10",
+    "platform": "win-x64"
+  },
+  "profile": {
+    "id": "wavpack-pure-lossless-hh-x6-v1",
+    "codec": "WavPack",
+    "codecVersion": "5.9.0"
+  },
+  "roots": {
+    "sourceLabel": "Studio Masters",
+    "sourceRootHint": null,
+    "destinationRoot": ".",
+    "redacted": true
+  },
+  "summary": {
+    "itemCount": 1,
+    "verifiedCount": 1,
+    "failedCount": 0,
+    "conflictCount": 0,
+    "skippedCount": 0,
+    "sourceBytes": 105840044,
+    "archiveBytes": 59301688
+  },
+  "items": [
+    {
+      "itemId": "e8a9464d-49e2-4eef-bb96-763875196c0f",
+      "source": {
+        "relativePath": "Album/Track 01.wav",
+        "length": 105840044,
+        "completeFileHash": {
+          "algorithm": "sha256",
+          "hex": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "observed": {
+          "creationTimeUtc": "2020-01-02T03:04:05Z",
+          "lastWriteTimeUtc": "2020-01-02T03:04:05Z",
+          "attributes": ["Archive"]
+        }
+      },
+      "archive": {
+        "relativePath": "Album/Track 01.wv",
+        "length": 59301688,
+        "completeFileHash": {
+          "algorithm": "sha256",
+          "hex": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "wavpackAudioMd5": {
+          "algorithm": "md5",
+          "scope": "wavpack-raw-audio",
+          "hex": "cccccccccccccccccccccccccccccccc"
+        }
+      },
+      "roundTrip": {
+        "restoredLength": 105840044,
+        "restoredCompleteFileHash": {
+          "algorithm": "sha256",
+          "hex": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "lengthMatched": true,
+        "hashMatched": true
+      },
+      "verification": {
+        "encoderExitedSuccessfully": true,
+        "encoderVerifyRequested": true,
+        "encoderVerifySucceeded": true,
+        "decoderExitedSuccessfully": true,
+        "wholeFileRoundTripSucceeded": true
+      },
+      "profileId": "wavpack-pure-lossless-hh-x6-v1",
+      "toolchain": {
+        "encoder": {
+          "name": "wavpack.exe",
+          "reportedVersion": "5.9.0",
+          "sha256": {
+            "algorithm": "sha256",
+            "hex": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+          }
+        },
+        "decoder": {
+          "name": "wvunpack.exe",
+          "reportedVersion": "5.9.0",
+          "sha256": {
+            "algorithm": "sha256",
+            "hex": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          }
+        }
+      },
+      "result": {
+        "status": "verified",
+        "failureCode": null,
+        "message": "Verified byte-for-byte restoration."
+      },
+      "timing": {
+        "startedUtc": "2026-06-19T18:31:00Z",
+        "completedUtc": "2026-06-19T18:35:12Z",
+        "durationMilliseconds": 252000
+      },
+      "operationId": "80636c48-668b-4eac-9864-e5ac52c3f22c"
+    }
+  ],
+  "operations": [
+    {
+      "operationId": "80636c48-668b-4eac-9864-e5ac52c3f22c",
+      "type": "archive",
+      "status": "completed",
+      "startedUtc": "2026-06-19T18:30:00Z",
+      "completedUtc": "2026-06-19T18:35:12Z",
+      "journalRelativePath": ".wavcrusher/journals/80636c48-668b-4eac-9864-e5ac52c3f22c.jsonl",
+      "reportRelativePath": ".wavcrusher/reports/80636c48-668b-4eac-9864-e5ac52c3f22c.report.json",
+      "summary": {
+        "verified": 1,
+        "failed": 0,
+        "conflict": 0,
+        "skipped": 0,
+        "cancelled": 0
+      }
+    }
+  ],
+  "extensions": {}
+}

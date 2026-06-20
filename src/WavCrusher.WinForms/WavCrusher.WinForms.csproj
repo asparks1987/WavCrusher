@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\WavCrusher.Application\WavCrusher.Application.csproj" />
+    <ProjectReference Include="..\WavCrusher.Infrastructure\WavCrusher.Infrastructure.csproj" />
+    <ProjectReference Include="..\WavCrusher.WavPack\WavCrusher.WavPack.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
