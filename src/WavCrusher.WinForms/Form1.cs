@@ -1,6 +1,7 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Formats.Tar;
+using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
@@ -99,11 +100,6 @@ public partial class Form1 : Form
         await RunRestoreAsync().ConfigureAwait(true);
     }
 
-    private void ClearButton_Click(object sender, EventArgs e)
-    {
-        ClearCurrentJobState();
-    }
-
     private void AboutButton_Click(object sender, EventArgs e)
     {
         using var dialog = new AboutDialog();
@@ -152,6 +148,34 @@ public partial class Form1 : Form
         }
     }
 
+    private void ClearSourcePathButton_Click(object sender, EventArgs e)
+    {
+        sourcePathTextBox.Clear();
+        _rows.Clear();
+        archiveButton.Enabled = false;
+        restoreButton.Enabled = false;
+        UpdateStatus("Source folder cleared.");
+    }
+
+    private void ClearOutputPathButton_Click(object sender, EventArgs e)
+    {
+        outputPathTextBox.Clear();
+        UpdateStatus("Output folder cleared.");
+    }
+
+    private void ClearPackagePathButton_Click(object sender, EventArgs e)
+    {
+        packagePathTextBox.Clear();
+        ClearLoadedPackageState(clearRows: _loadedManifest is not null);
+        UpdateStatus("Package path cleared.");
+    }
+
+    private void ClearRestoreRootButton_Click(object sender, EventArgs e)
+    {
+        restoreRootTextBox.Clear();
+        UpdateStatus("Restore folder cleared.");
+    }
+
     private void RestoreModeChanged(object sender, EventArgs e)
     {
         UpdateModeControls();
@@ -173,7 +197,6 @@ public partial class Form1 : Form
         _loadedManifest = null;
         _loadedPackagePath = string.Empty;
         packageSummaryLabel.Text = "No package loaded.";
-        clearButton.Enabled = false;
 
         _operationCancellation = new CancellationTokenSource();
         SetBusy(true);
@@ -1068,11 +1091,14 @@ public partial class Form1 : Form
         scanButton.Enabled = !busy;
         archiveButton.Enabled = !busy && _rows.Count > 0;
         restoreButton.Enabled = !busy && _loadedManifest is not null;
-        clearButton.Enabled = !busy && HasCurrentJobState();
         browseSourceButton.Enabled = !busy;
         browseOutputButton.Enabled = !busy;
         browsePackageButton.Enabled = !busy;
         browseRestoreRootButton.Enabled = !busy;
+        clearSourcePathButton.Enabled = !busy;
+        clearOutputPathButton.Enabled = !busy;
+        clearPackagePathButton.Enabled = !busy;
+        clearRestoreRootButton.Enabled = !busy;
         recursiveCheckBox.Enabled = !busy;
         restoreToFolderRadioButton.Enabled = !busy;
         restoreToOriginalRadioButton.Enabled = !busy;
@@ -1088,7 +1114,7 @@ public partial class Form1 : Form
         }
     }
 
-    private void ClearCurrentJobState()
+    private void ClearLoadedPackageState(bool clearRows)
     {
         try
         {
@@ -1107,30 +1133,17 @@ public partial class Form1 : Form
         _loadedPackageStagingRoot = string.Empty;
         _loadedManifest = null;
         _loadedPackagePath = string.Empty;
-        _rows.Clear();
-        restoreToFolderRadioButton.Checked = true;
-        UpdateModeControls();
+        if (clearRows)
+        {
+            _rows.Clear();
+            archiveButton.Enabled = false;
+        }
 
-        sourcePathTextBox.Clear();
-        outputPathTextBox.Clear();
-        packagePathTextBox.Clear();
-        restoreRootTextBox.Clear();
-        recursiveCheckBox.Checked = true;
         packageSummaryLabel.Text = "No package loaded.";
         ResetProgressUi();
-        UpdateStatus("Job state cleared. Ready for another run.");
 
-        archiveButton.Enabled = false;
         restoreButton.Enabled = false;
-        clearButton.Enabled = false;
     }
-
-    private bool HasCurrentJobState() =>
-        _loadedManifest is not null
-        || _rows.Count > 0
-        || !string.IsNullOrWhiteSpace(packagePathTextBox.Text)
-        || !string.IsNullOrWhiteSpace(restoreRootTextBox.Text)
-        || !string.IsNullOrWhiteSpace(_loadedPackageStagingRoot);
 
     private void InitializeProgressUi(int totalItems, string summaryText)
     {
@@ -1422,6 +1435,12 @@ public partial class Form1 : Form
         public string? ArchiveRelativePath { get; set; }
 
         public long? ArchiveLengthBytes { get; set; }
+
+        public string SourceBytesText => LengthBytes.ToString("N0", CultureInfo.InvariantCulture);
+
+        public string ArchiveBytesText => ArchiveLengthBytes is long archiveLength
+            ? archiveLength.ToString("N0", CultureInfo.InvariantCulture)
+            : "n/a";
 
         public string CompressionRatioText => ArchiveLengthBytes is long archiveLength
             ? FormatCompressionRatio(archiveLength, LengthBytes)

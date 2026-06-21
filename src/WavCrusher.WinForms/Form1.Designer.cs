@@ -11,12 +11,15 @@ partial class Form1
     private Button browseOutputButton;
     private Button browsePackageButton;
     private Button browseRestoreRootButton;
+    private Button clearSourcePathButton;
+    private Button clearOutputPathButton;
+    private Button clearPackagePathButton;
+    private Button clearRestoreRootButton;
     private CheckBox recursiveCheckBox;
     private FlowLayoutPanel commandPanel;
     private Button scanButton;
     private Button archiveButton;
     private Button restoreButton;
-    private Button clearButton;
     private Button aboutButton;
     private Button cancelButton;
     private RadioButton restoreToFolderRadioButton;
@@ -55,12 +58,15 @@ partial class Form1
         browseOutputButton = new Button();
         browsePackageButton = new Button();
         browseRestoreRootButton = new Button();
+        clearSourcePathButton = new Button();
+        clearOutputPathButton = new Button();
+        clearPackagePathButton = new Button();
+        clearRestoreRootButton = new Button();
         recursiveCheckBox = new CheckBox();
         commandPanel = new FlowLayoutPanel();
         scanButton = new Button();
         archiveButton = new Button();
         restoreButton = new Button();
-        clearButton = new Button();
         aboutButton = new Button();
         cancelButton = new Button();
         restoreToFolderRadioButton = new RadioButton();
@@ -83,9 +89,10 @@ partial class Form1
         ((System.ComponentModel.ISupportInitialize)filesGrid).BeginInit();
         SuspendLayout();
 
-        rootLayout.ColumnCount = 3;
+        rootLayout.ColumnCount = 4;
         rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 112F));
         rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 72F));
         rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120F));
         rootLayout.Dock = DockStyle.Fill;
         rootLayout.Padding = new Padding(12);
@@ -152,6 +159,30 @@ partial class Form1
         browseRestoreRootButton.AccessibleName = "Browse restore folder";
         browseRestoreRootButton.Click += BrowseRestoreRootButton_Click;
 
+        clearSourcePathButton.Text = "Clear";
+        clearSourcePathButton.AutoSize = true;
+        clearSourcePathButton.Dock = DockStyle.Fill;
+        clearSourcePathButton.AccessibleName = "Clear source folder path";
+        clearSourcePathButton.Click += ClearSourcePathButton_Click;
+
+        clearOutputPathButton.Text = "Clear";
+        clearOutputPathButton.AutoSize = true;
+        clearOutputPathButton.Dock = DockStyle.Fill;
+        clearOutputPathButton.AccessibleName = "Clear output folder path";
+        clearOutputPathButton.Click += ClearOutputPathButton_Click;
+
+        clearPackagePathButton.Text = "Clear";
+        clearPackagePathButton.AutoSize = true;
+        clearPackagePathButton.Dock = DockStyle.Fill;
+        clearPackagePathButton.AccessibleName = "Clear package path";
+        clearPackagePathButton.Click += ClearPackagePathButton_Click;
+
+        clearRestoreRootButton.Text = "Clear";
+        clearRestoreRootButton.AutoSize = true;
+        clearRestoreRootButton.Dock = DockStyle.Fill;
+        clearRestoreRootButton.AccessibleName = "Clear restore folder path";
+        clearRestoreRootButton.Click += ClearRestoreRootButton_Click;
+
         recursiveCheckBox.Text = "Include subfolders";
         recursiveCheckBox.AutoSize = true;
         recursiveCheckBox.AccessibleName = "Include subfolders";
@@ -173,12 +204,6 @@ partial class Form1
         restoreButton.Enabled = false;
         restoreButton.AccessibleName = "Restore files from package";
         restoreButton.Click += RestoreButton_Click;
-
-        clearButton.Text = "Clear";
-        clearButton.AutoSize = true;
-        clearButton.Enabled = false;
-        clearButton.AccessibleName = "Clear current job state";
-        clearButton.Click += ClearButton_Click;
 
         aboutButton.Text = "About";
         aboutButton.AutoSize = true;
@@ -235,9 +260,15 @@ partial class Form1
         });
         filesGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
-            DataPropertyName = "LengthBytes",
-            HeaderText = "Bytes",
-            Width = 110
+            DataPropertyName = "SourceBytesText",
+            HeaderText = "Original bytes",
+            Width = 120
+        });
+        filesGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            DataPropertyName = "ArchiveBytesText",
+            HeaderText = "Archive bytes",
+            Width = 120
         });
         filesGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
@@ -295,7 +326,6 @@ partial class Form1
         commandPanel.Controls.Add(scanButton);
         commandPanel.Controls.Add(archiveButton);
         commandPanel.Controls.Add(restoreButton);
-        commandPanel.Controls.Add(clearButton);
         commandPanel.Controls.Add(aboutButton);
         commandPanel.Controls.Add(cancelButton);
 
@@ -316,35 +346,39 @@ partial class Form1
 
         rootLayout.Controls.Add(sourceLabel, 0, 0);
         rootLayout.Controls.Add(sourcePathTextBox, 1, 0);
-        rootLayout.Controls.Add(browseSourceButton, 2, 0);
+        rootLayout.Controls.Add(clearSourcePathButton, 2, 0);
+        rootLayout.Controls.Add(browseSourceButton, 3, 0);
 
         rootLayout.Controls.Add(outputLabel, 0, 1);
         rootLayout.Controls.Add(outputPathTextBox, 1, 1);
-        rootLayout.Controls.Add(browseOutputButton, 2, 1);
+        rootLayout.Controls.Add(clearOutputPathButton, 2, 1);
+        rootLayout.Controls.Add(browseOutputButton, 3, 1);
 
         rootLayout.Controls.Add(packageLabel, 0, 2);
         rootLayout.Controls.Add(packagePathTextBox, 1, 2);
-        rootLayout.Controls.Add(browsePackageButton, 2, 2);
+        rootLayout.Controls.Add(clearPackagePathButton, 2, 2);
+        rootLayout.Controls.Add(browsePackageButton, 3, 2);
 
         rootLayout.Controls.Add(restoreRootLabel, 0, 3);
         rootLayout.Controls.Add(restoreRootTextBox, 1, 3);
-        rootLayout.Controls.Add(browseRestoreRootButton, 2, 3);
+        rootLayout.Controls.Add(clearRestoreRootButton, 2, 3);
+        rootLayout.Controls.Add(browseRestoreRootButton, 3, 3);
 
         rootLayout.Controls.Add(commandPanel, 1, 4);
-        rootLayout.SetColumnSpan(commandPanel, 2);
+        rootLayout.SetColumnSpan(commandPanel, 3);
 
         rootLayout.Controls.Add(restoreModePanel, 1, 5);
-        rootLayout.SetColumnSpan(restoreModePanel, 2);
+        rootLayout.SetColumnSpan(restoreModePanel, 3);
 
         rootLayout.Controls.Add(filesGrid, 0, 6);
-        rootLayout.SetColumnSpan(filesGrid, 3);
+        rootLayout.SetColumnSpan(filesGrid, 4);
 
         rootLayout.Controls.Add(packageSummaryLabel, 0, 7);
-        rootLayout.SetColumnSpan(packageSummaryLabel, 3);
+        rootLayout.SetColumnSpan(packageSummaryLabel, 4);
 
         // status row
         rootLayout.Controls.Add(statusPanel, 0, 8);
-        rootLayout.SetColumnSpan(statusPanel, 3);
+        rootLayout.SetColumnSpan(statusPanel, 4);
 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
