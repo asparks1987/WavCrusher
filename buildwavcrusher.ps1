@@ -179,39 +179,39 @@ function New-WixUiBitmaps([string]$AssetsRoot) {
     $dialog = New-Object System.Drawing.Bitmap 493, 312
     $g = [System.Drawing.Graphics]::FromImage($dialog)
     $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    $dialogBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
-        (New-Object System.Drawing.Rectangle 0, 0, 493, 312),
+    $paperBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(246, 244, 238))
+    $g.FillRectangle($paperBrush, 0, 0, 493, 312)
+
+    $sidebarBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
+        (New-Object System.Drawing.Rectangle 0, 0, 164, 312),
         [System.Drawing.Color]::FromArgb(18, 24, 22),
         [System.Drawing.Color]::FromArgb(8, 50, 36),
-        35)
-    $g.FillRectangle($dialogBrush, 0, 0, 493, 312)
+        90)
+    $g.FillRectangle($sidebarBrush, 0, 0, 164, 312)
 
-    $contentBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(246, 244, 238))
-    $contentShadow = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(70, 0, 0, 0))
-    $g.FillRectangle($contentShadow, 173, 35, 292, 168)
-    $g.FillRectangle($contentBrush, 166, 28, 292, 168)
+    $dividerBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(238, 183, 93))
+    $g.FillRectangle($dividerBrush, 164, 0, 4, 312)
 
-    $accentPen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(238, 183, 93)), 4
-    $g.DrawLine($accentPen, 184, 84, 438, 84)
-
-    $pen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(94, 224, 167)), 9
+    $pen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(130, 94, 224, 167)), 7
     $pen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
     $pen.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
     $points = @(
-        (New-Object System.Drawing.Point 36, 176),
-        (New-Object System.Drawing.Point 92, 126),
-        (New-Object System.Drawing.Point 144, 210),
-        (New-Object System.Drawing.Point 198, 158),
-        (New-Object System.Drawing.Point 252, 220),
-        (New-Object System.Drawing.Point 330, 184)
+        (New-Object System.Drawing.Point 18, 234),
+        (New-Object System.Drawing.Point 50, 202),
+        (New-Object System.Drawing.Point 82, 278),
+        (New-Object System.Drawing.Point 114, 204),
+        (New-Object System.Drawing.Point 146, 238)
     )
     $g.DrawCurve($pen, $points, 0.55)
-    $titleFont = New-Object System.Drawing.Font "Segoe UI Black", 36, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
-    $smallFont = New-Object System.Drawing.Font "Segoe UI", 17, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
+    $titleFont = New-Object System.Drawing.Font "Segoe UI Black", 28, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
+    $smallFont = New-Object System.Drawing.Font "Segoe UI", 13, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
     $white = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(245, 243, 236))
     $green = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(94, 224, 167))
-    $g.DrawString("WavCrusher", $titleFont, $white, 34, 34)
-    $g.DrawString("Verified lossless WAV archiving", $smallFont, $green, 38, 82)
+    $g.DrawString("Wav", $titleFont, $white, 18, 36)
+    $g.DrawString("Crusher", $titleFont, $white, 18, 68)
+    $g.DrawString("Verified", $smallFont, $green, 20, 124)
+    $g.DrawString("lossless WAV", $smallFont, $green, 20, 144)
+    $g.DrawString("archiving", $smallFont, $green, 20, 164)
     $dialog.Save($dialogPath, [System.Drawing.Imaging.ImageFormat]::Png)
     $g.Dispose()
     $dialog.Dispose()
@@ -219,15 +219,17 @@ function New-WixUiBitmaps([string]$AssetsRoot) {
     $banner = New-Object System.Drawing.Bitmap 493, 58
     $g = [System.Drawing.Graphics]::FromImage($banner)
     $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+    $g.FillRectangle($paperBrush, 0, 0, 493, 58)
     $bannerBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
-        (New-Object System.Drawing.Rectangle 0, 0, 493, 58),
+        (New-Object System.Drawing.Rectangle 0, 0, 164, 58),
         [System.Drawing.Color]::FromArgb(8, 50, 36),
         [System.Drawing.Color]::FromArgb(18, 24, 22),
         0)
-    $g.FillRectangle($bannerBrush, 0, 0, 493, 58)
+    $g.FillRectangle($bannerBrush, 0, 0, 164, 58)
+    $g.FillRectangle($dividerBrush, 164, 0, 4, 58)
     $font = New-Object System.Drawing.Font "Segoe UI Black", 18, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
     $g.DrawString("WavCrusher", $font, $white, 20, 15)
-    $g.FillEllipse($green, 440, 16, 24, 24)
+    $g.FillEllipse($green, 132, 18, 20, 20)
     $banner.Save($bannerPath, [System.Drawing.Imaging.ImageFormat]::Png)
     $g.Dispose()
     $banner.Dispose()

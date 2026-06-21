@@ -1318,6 +1318,13 @@ public partial class Form1 : Form
                 Dock = DockStyle.Top
             };
 
+            var versionLabel = new Label
+            {
+                Text = $"Version: {GetDisplayVersion()}",
+                AutoSize = true,
+                Dock = DockStyle.Top
+            };
+
             var descriptionLabel = new Label
             {
                 Text = "WavCrusher archives WAV files as verified pure-lossless WavPack .wv files and keeps source WAVs intact.",
@@ -1349,7 +1356,14 @@ public partial class Form1 : Form
                     "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\r\n" +
                     "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\r\n" +
                     "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\r\n" +
-                    "SOFTWARE."
+                    "SOFTWARE.\r\n\r\n" +
+                    "Most recent changes\r\n\r\n" +
+                    "- Added MSI installer packaging with install-directory selection.\r\n" +
+                    "- Added detailed progress bars for long archive and restore jobs.\r\n" +
+                    "- Added per-file original and archive byte counts plus compression ratio.\r\n" +
+                    "- Added original-location display when loading packages for restore.\r\n" +
+                    "- Added bounded multi-file archival for better multi-core throughput.\r\n" +
+                    "- Added per-field Clear buttons for source, output, package, and restore paths."
             };
 
             var closeButton = new Button
@@ -1377,6 +1391,7 @@ public partial class Form1 : Form
                 Height = 120
             };
             headerPanel.Controls.Add(licenseLabel);
+            headerPanel.Controls.Add(versionLabel);
             headerPanel.Controls.Add(emailLabel);
             headerPanel.Controls.Add(authorLabel);
             headerPanel.Controls.Add(titleLabel);
@@ -1388,6 +1403,12 @@ public partial class Form1 : Form
             Controls.Add(licenseTextBox);
             Controls.Add(buttonPanel);
             Controls.Add(headerPanel);
+        }
+
+        private static string GetDisplayVersion()
+        {
+            var version = typeof(Form1).Assembly.GetName().Version;
+            return version is null ? "Unknown" : version.ToString(3);
         }
     }
 
