@@ -185,16 +185,25 @@ function New-WixUiBitmaps([string]$AssetsRoot) {
         [System.Drawing.Color]::FromArgb(8, 50, 36),
         35)
     $g.FillRectangle($dialogBrush, 0, 0, 493, 312)
+
+    $contentBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(246, 244, 238))
+    $contentShadow = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(70, 0, 0, 0))
+    $g.FillRectangle($contentShadow, 173, 35, 292, 168)
+    $g.FillRectangle($contentBrush, 166, 28, 292, 168)
+
+    $accentPen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(238, 183, 93)), 4
+    $g.DrawLine($accentPen, 184, 84, 438, 84)
+
     $pen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(94, 224, 167)), 9
     $pen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
     $pen.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
     $points = @(
         (New-Object System.Drawing.Point 36, 176),
-        (New-Object System.Drawing.Point 112, 118),
-        (New-Object System.Drawing.Point 188, 214),
-        (New-Object System.Drawing.Point 268, 86),
-        (New-Object System.Drawing.Point 348, 204),
-        (New-Object System.Drawing.Point 456, 140)
+        (New-Object System.Drawing.Point 92, 126),
+        (New-Object System.Drawing.Point 144, 210),
+        (New-Object System.Drawing.Point 198, 158),
+        (New-Object System.Drawing.Point 252, 220),
+        (New-Object System.Drawing.Point 330, 184)
     )
     $g.DrawCurve($pen, $points, 0.55)
     $titleFont = New-Object System.Drawing.Font "Segoe UI Black", 36, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
@@ -287,7 +296,7 @@ Verified items have been restored and compared byte-for-byte before being report
     }
 
     $localizationPath = Join-Path $InstallerRoot "WavCrusher.en-us.wxl"
-    $welcomeDescription = "WavCrusher archives large WAV collections into verified pure-lossless WavPack files. It is built for musicians, collectors, studios, and anyone who wants to save space without giving up byte-for-byte recovery. Author: Aryn Mikel Sparks. Click Next to continue."
+    $welcomeDescription = "Archive large WAV collections into verified pure-lossless WavPack files. Author: Aryn Mikel Sparks. Click Next to continue."
     $wxl = @"
 <WixLocalization Culture="en-US" xmlns="http://wixtoolset.org/schemas/v4/wxl">
   <String Id="WelcomeDlgTitle" Value="Welcome to [ProductName] Setup" />
