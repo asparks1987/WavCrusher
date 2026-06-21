@@ -110,6 +110,11 @@ public sealed class WavPackCliCompressor : IArchiveCompressor
                 progress?.Report(new ArchiveItemProgress(request.ItemId, "Publishing", Path.GetFileName(destinationPath)));
                 var archiveHash = await Sha256Async(tempArchivePath, cancellationToken).ConfigureAwait(false);
                 File.Move(tempArchivePath, destinationPath, overwrite: false);
+                var publishedArchiveHash = await Sha256Async(destinationPath, cancellationToken).ConfigureAwait(false);
+                if (!string.Equals(archiveHash, publishedArchiveHash, StringComparison.Ordinal))
+                {
+                    return Failure(request, "ArchivePublishHashMismatch", "Published .wv bytes did not match verified archive bytes.");
+                }
 
                 return new ArchiveResult(
                     request.ItemId,
@@ -120,7 +125,7 @@ public sealed class WavPackCliCompressor : IArchiveCompressor
                     Message: "Compressed and verified byte-for-byte restoration.",
                     sourceHash,
                     restoredHash,
-                    archiveHash);
+                    publishedArchiveHash);
             }
             finally
             {

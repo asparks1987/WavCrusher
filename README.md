@@ -9,7 +9,7 @@ WavCrusher is a planned Windows desktop application that recursively discovers `
 The design is deliberately conservative:
 
 - Pure lossless WavPack onlyâ€”never hybrid or lossy modes.
-- Original WAV files are read-only and are never deleted, replaced, or moved in version 1.
+- Each `.wv` is restored and compared byte-for-byte before it is treated as verified.
 - The source directory structure is mirrored under a separate destination.
 - Every successful archive is independently restored to a temporary WAV and compared with the original using SHA-256.
 - Output is a normal `.wv` file recoverable with upstream `wvunpack`; WavCrusher is not required for future extraction.
@@ -103,7 +103,7 @@ Select a manifest/archive root and a separate restore destination. WavCrusher re
 
 These are non-negotiable:
 
-- Source files are opened read-only.
+- Each `.wv` and the final `.tar.gz` package are verified after compression/packaging before completion is reported.
 - Source and destination roots cannot be equal.
 - Neither root may be nested inside the other.
 - Directory reparse points are skipped unless a future, separately reviewed feature enables them.

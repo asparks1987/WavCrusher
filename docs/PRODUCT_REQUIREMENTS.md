@@ -29,7 +29,7 @@ A credible archival tool must do more than say â€œlossless.â€ It must:
 
 ### G-1 â€” Safe recursive archiving
 
-Process all supported `.wav` files beneath a selected source root while preserving relative directory structure and never modifying the source tree.
+Process all supported `.wav` files beneath a selected source root while preserving relative directory structure and producing verified archival evidence.
 
 ### G-2 â€” Whole-file proof
 
@@ -135,7 +135,7 @@ Has a large WAV folder and needs a guided workflow that prevents accidental same
 
 | ID | Requirement |
 |---|---|
-| FR-030 | The app shall open source content read-only and shall never delete, move, rename, truncate, replace, or write it. |
+| FR-030 | The app shall create verified `.wv` archives and retain evidence needed to support user-controlled source retention decisions. |
 | FR-031 | The app shall use one fixed pure-lossless WavPack archival profile in version 1. |
 | FR-032 | The profile shall request highest compression, maximum extra analysis, stored audio MD5, output verification, timestamp copy where supported, and no overwrite. |
 | FR-033 | The app shall create missing destination directories only beneath the validated destination root. |
@@ -160,6 +160,7 @@ Has a large WAV folder and needs a guided workflow that prevents accidental same
 | ID | Requirement |
 |---|---|
 | FR-050 | Each operation shall have a unique ID and start/end metadata. |
+| FR-050A | After final `.tar.gz` creation, the app shall extract the package and compare packaged payload bytes against staged archive content before reporting completion. |
 | FR-051 | Terminal item outcomes shall be appended to an operation journal and flushed before another item is considered complete. |
 | FR-052 | The app shall produce a versioned JSON manifest that follows `MANIFEST_SPEC.md`. |
 | FR-053 | The manifest shall use relative paths and include hashes with algorithm names. |
@@ -208,7 +209,7 @@ Has a large WAV folder and needs a guided workflow that prevents accidental same
 | ID | Requirement |
 |---|---|
 | FR-090 | Settings may include worker count, temporary-space location policy, report redaction, UI preferences, and last-used folders. |
-| FR-091 | Settings shall not expose lossy/hybrid modes, source deletion, wrapper discard, overwrite, or verification bypass. |
+| FR-091 | Settings shall not expose lossy/hybrid modes, wrapper discard, overwrite, or verification bypass. |
 | FR-092 | Settings shall have safe defaults and a reset action. |
 | FR-093 | Invalid or future-version settings shall be ignored safely with a warning, not crash startup. |
 
@@ -344,7 +345,7 @@ Version 1 may be called stable only when:
 
 - All P0/P1 functional requirements are implemented or explicitly re-scoped before release.
 - The acceptance checklist has linked evidence.
-- An independent reviewer confirms source immutability and path containment.
+- An independent reviewer confirms path containment, `.wv` verification, and `.tar.gz` package verification.
 - The corpus and clean-machine recovery drill pass.
 - The website uses accurate, qualified claims.
 - Naming and license reviews are complete.

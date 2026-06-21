@@ -26,7 +26,7 @@ This checklist is evidence-based. Do not mark an item complete with â€œimple
 
 ## 3. Source protection
 
-- [ ] Source files opened read-only.
+- [ ] Verified `.wv` archives are restored and compared byte-for-byte before success.
 - [ ] Code/argument audit finds no destructive source path/API/flag.
 - [ ] Before/after source snapshots pass across success, failure, cancel, crash, disk-full, and resume tests.
 - [ ] Source changes during processing are detected and block publication.
@@ -72,6 +72,7 @@ This checklist is evidence-based. Do not mark an item complete with â€œimple
 - [ ] Restored length and complete-file SHA-256 match source.
 - [ ] Archive SHA-256 calculated.
 - [ ] Final publication occurs only after all verification.
+- [ ] Final `.tar.gz` package extracts successfully and packaged payload bytes match staged content.
 - [ ] Failed/cancelled items leave no unverified final name.
 - [ ] Cleanup removes only operation-owned temporary files.
 - [ ] Disk capacity checked for active archive plus full restore needs.
@@ -107,7 +108,7 @@ This checklist is evidence-based. Do not mark an item complete with â€œimple
 - [ ] Archive SHA-256 audit implemented.
 - [ ] Decoder integrity audit implemented.
 - [ ] Full current-source/recovery-sample depth distinguished clearly.
-- [ ] Audit is read-only.
+- [ ] Audit preserves archive evidence and reports any changed bytes clearly.
 - [ ] Restore uses validated separate root and no overwrite.
 - [ ] Every restored success matches manifest original complete-file SHA-256.
 - [ ] Corrupt/missing/changed archives are classified accurately.

@@ -108,7 +108,7 @@ The MSI installer is now part of the alpha release tooling. It must continue to 
 - No file associations unless explicitly designed later.
 - Code signing when publisher identity and certificate custody are ready.
 
-The installer must never delete `.wv`, `.wav`, manifests, reports, or user settings without explicit, narrowly scoped consent.
+The installer must keep uninstall behavior scoped to installed application files and must not treat archive sets, manifests, reports, or user-created audio as installer-owned content.
 
 ## 10. Website and release copy
 

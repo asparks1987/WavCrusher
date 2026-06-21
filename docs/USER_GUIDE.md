@@ -4,7 +4,7 @@
 
 ## 1. What WavCrusher does
 
-WavCrusher stores WAV files more compactly as lossless WavPack `.wv` files. It keeps the folder layout, never modifies the originals, restores every candidate archive to temporary storage, and checks that the restored WAV is byte-for-byte identical before calling the archive verified.
+WavCrusher stores WAV files more compactly as lossless WavPack `.wv` files. It keeps the folder layout, restores every candidate archive to temporary storage, and checks that the restored WAV is byte-for-byte identical before calling the archive verified.
 
 A successful archive can be recovered later with WavCrusher or the standard `wvunpack` program.
 
@@ -17,7 +17,7 @@ WavCrusher is an archive-creation and verification tool, not a complete backup s
 - The manifest, journal, reports, checksums, WavPack decoder, license, and documentation with each archive set.
 - A schedule for periodic audits and storage replacement.
 
-Do not delete source WAVs immediately after the first archive run. Confirm multiple copies and perform a recovery drill first.
+Make source-retention decisions only after verified `.wv` creation, verified `.tar.gz` packaging, multiple copies, and a recovery drill.
 
 ## 3. Before you begin
 
@@ -83,6 +83,8 @@ Select **Start verified archive**. For each WAV, the app:
 6. Hashes the archive.
 7. Publishes the final `.wv` only after all checks pass.
 8. Records durable evidence.
+9. Builds the final `.tar.gz` package.
+10. Extracts and compares the packaged payload bytes before reporting package completion.
 
 ### Step 5 â€” Read status correctly
 
@@ -99,7 +101,7 @@ Select **Start verified archive**. For each WAV, the app:
 - **Pause:** Stops starting new files. Active files normally finish their current pipeline safely.
 - **Cancel:** Stops scheduling, terminates active WavPack processes safely, records cancellation, and removes operation-owned temporary files according to policy.
 
-Cancellation never deletes source WAVs. It may leave an incomplete operation record that can be inspected/resumed.
+Cancellation preserves a coherent operation record that can be inspected/resumed.
 
 ## 5. Completion and reports
 

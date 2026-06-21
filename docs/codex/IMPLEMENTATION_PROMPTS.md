@@ -9,7 +9,7 @@ Read AGENTS.md, docs/ARCHIVE_SAFETY_SPEC.md, docs/PRODUCT_REQUIREMENTS.md,
 and the ADRs relevant to this task. Inspect the current repository before editing.
 Safety and whole-file recoverability outrank speed and code volume.
 
-Work only on the requested task. Do not add source deletion, overwrite, lossy/hybrid
+Work only on the requested task. Do not add overwrite, lossy/hybrid
 options, free-form WavPack arguments, shell invocation, network behavior, or symlink
 following. Add tests and update documentation. Run the applicable commands and report
 exact results. If an assumption about WavPack or Windows is unproven, create a failing
@@ -130,7 +130,7 @@ Acceptance:
 ## Prompt 05 â€” One-item transactional pipeline
 
 ```text
-Implement ArchiveItemPipeline for one planned item. It must open/hash the source read-only,
+Implement ArchiveItemPipeline for one planned item. It must hash the source,
 observe source state before/after, encode to an operation-owned same-directory temporary
 archive name, require encoder verification, decode into an isolated temporary workspace,
 compare complete-file length and SHA-256, hash the archive, publish to final with no

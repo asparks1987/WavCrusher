@@ -14,7 +14,7 @@ WavPackâ€™s verification and stored MD5 protect the encoded audio data. Wav
 
 ## Will WavCrusher delete my original WAVs?
 
-No. Version 1 has no source deletion, replacement, move, or rename feature. Source files are read-only inputs.
+WavCrusher focuses on proving archive integrity first. Treat original retention as a separate user-controlled decision after verified `.wv` creation, verified `.tar.gz` packaging, redundant copies, and a restore drill.
 
 ## Can I restore without WavCrusher?
 

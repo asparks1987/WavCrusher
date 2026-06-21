@@ -381,10 +381,12 @@ public partial class Form1 : Form
             }
 
             File.Move(packageTempPath, packagePath, overwrite: false);
+            UpdateCurrentItemProgressUi(Path.GetFileName(packagePath), "Verifying package", true);
+            await VerifyTarGzPackageAsync(packagePath, packageManifestRoot, tarPath, _operationCancellation.Token).ConfigureAwait(true);
             UpdateStatus($"Created package: {packagePath}");
             MessageBox.Show(
                 this,
-                $"Package created.{Environment.NewLine}{packagePath}",
+                $"Package created and verified.{Environment.NewLine}{packagePath}",
                 "Archive complete",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
@@ -884,6 +886,82 @@ public partial class Form1 : Form
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
+    private static async Task VerifyTarGzPackageAsync(
+        string packagePath,
+        string expectedRoot,
+        string excludedTarPath,
+        CancellationToken cancellationToken)
+    {
+        var verificationRoot = Path.Combine(
+            Path.GetTempPath(),
+            "WavCrusher",
+            "PackageVerify",
+            Guid.NewGuid().ToString("N"));
+        var extractedRoot = Path.Combine(verificationRoot, "extracted");
+        var verificationTarPath = Path.Combine(verificationRoot, "package.tar");
+
+        Directory.CreateDirectory(extractedRoot);
+
+        try
+        {
+            using (var packageStream = File.OpenRead(packagePath))
+            using (var gzip = new GZipStream(packageStream, CompressionMode.Decompress))
+            using (var tarOutput = File.Create(verificationTarPath))
+            {
+                await gzip.CopyToAsync(tarOutput, cancellationToken).ConfigureAwait(false);
+            }
+
+            TarFile.ExtractToDirectory(verificationTarPath, extractedRoot, overwriteFiles: false);
+
+            var expectedFiles = Directory
+                .EnumerateFiles(expectedRoot, "*", SearchOption.AllDirectories)
+                .Where(path => !Path.GetFullPath(path).Equals(Path.GetFullPath(excludedTarPath), StringComparison.OrdinalIgnoreCase))
+                .Select(path => GetRelativeFileHash(expectedRoot, path, cancellationToken))
+                .ToList();
+
+            var extractedFiles = Directory
+                .EnumerateFiles(extractedRoot, "*", SearchOption.AllDirectories)
+                .Select(path => GetRelativeFileHash(extractedRoot, path, cancellationToken))
+                .ToList();
+
+            var expectedHashes = await Task.WhenAll(expectedFiles).ConfigureAwait(false);
+            var extractedHashes = await Task.WhenAll(extractedFiles).ConfigureAwait(false);
+            var expectedSet = expectedHashes.OrderBy(item => item.RelativePath, StringComparer.OrdinalIgnoreCase).ToArray();
+            var extractedSet = extractedHashes.OrderBy(item => item.RelativePath, StringComparer.OrdinalIgnoreCase).ToArray();
+
+            if (expectedSet.Length != extractedSet.Length)
+            {
+                throw new InvalidOperationException("Package verification failed: extracted file count does not match staged archive content.");
+            }
+
+            for (var index = 0; index < expectedSet.Length; index++)
+            {
+                if (!string.Equals(expectedSet[index].RelativePath, extractedSet[index].RelativePath, StringComparison.OrdinalIgnoreCase)
+                    || !string.Equals(expectedSet[index].Hash, extractedSet[index].Hash, StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException($"Package verification failed: extracted file differs from staged content: {expectedSet[index].RelativePath}");
+                }
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(verificationRoot))
+            {
+                Directory.Delete(verificationRoot, recursive: true);
+            }
+        }
+    }
+
+    private static async Task<RelativeFileHash> GetRelativeFileHash(
+        string root,
+        string path,
+        CancellationToken cancellationToken)
+    {
+        var relativePath = Path.GetRelativePath(root, path).Replace('\\', '/');
+        var hash = await ComputeSha256Async(path, cancellationToken).ConfigureAwait(false);
+        return new RelativeFileHash(relativePath, hash);
+    }
+
     private static TarballArchiveManifest BuildManifest(IReadOnlyList<TarballManifestItem> items, string packageId, string sourceRootHint)
     {
         var verifiedCount = items.Count(item => string.Equals(item.Status, ArchiveCompletedStatus, StringComparison.OrdinalIgnoreCase));
@@ -1327,7 +1405,7 @@ public partial class Form1 : Form
 
             var descriptionLabel = new Label
             {
-                Text = "WavCrusher archives WAV files as verified pure-lossless WavPack .wv files and keeps source WAVs intact.",
+                Text = "WavCrusher archives WAV files as verified pure-lossless WavPack .wv files with byte-for-byte evidence.",
                 AutoSize = false,
                 Dock = DockStyle.Top,
                 Height = 44
@@ -1500,4 +1578,6 @@ public partial class Form1 : Form
         string Message);
 
     private sealed record ProcessOutcome(int ExitCode, bool Succeeded, string Diagnostics, TimeSpan Duration);
+
+    private sealed record RelativeFileHash(string RelativePath, string Hash);
 }

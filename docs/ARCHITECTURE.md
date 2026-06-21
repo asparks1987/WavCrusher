@@ -6,7 +6,7 @@ WavCrusherâ€™s architecture exists to make unsafe states difficult to repre
 
 Primary qualities:
 
-- Source immutability.
+- Verified source-to-archive evidence.
 - Path containment.
 - Transactional output publication.
 - Independent whole-file verification.
@@ -190,6 +190,12 @@ No cyclical project references are permitted.
 - Validates schema version.
 - Writes snapshots transactionally.
 - Rebuilds snapshots from journals.
+
+### PackageVerifier
+
+- Decompresses and extracts the final `.tar.gz` package after creation.
+- Compares extracted payload file hashes against staged `.wv` and manifest/report content.
+- Blocks completion if packaged bytes differ from staged content.
 
 ### ReportGenerator
 

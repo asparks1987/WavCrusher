@@ -17,7 +17,7 @@ WavPack audio MD5 is useful evidence, but it does not replace complete-file SHA-
 
 ## Source handling
 
-Source WAV files are archival inputs. WavCrusher must not overwrite, rename, truncate, or modify them during archive, audit, or restore workflows. Users should make multiple verified archive copies and perform recovery drills before making independent retention decisions.
+Source WAV files are archival inputs. WavCrusher must prove the `.wv` archive and final `.tar.gz` package before reporting success. Users should make multiple verified archive copies and perform recovery drills before making independent retention decisions.
 
 ## Path safety
 
@@ -26,6 +26,10 @@ WavCrusher rejects overlapping source and destination roots, unsafe relative pat
 ## Output safety
 
 Archives are written to operation-owned temporary names first. A final `.wv` file is published only after verification succeeds. Existing outputs are conflicts, not overwrite targets.
+
+## Package verification
+
+After the final `.tar.gz` is created, WavCrusher must decompress and extract it into a verification workspace, then compare packaged payload hashes against the staged `.wv` and manifest content. Package completion must not be reported if extracted bytes differ.
 
 ## Failure language
 

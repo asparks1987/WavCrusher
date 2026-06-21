@@ -28,4 +28,4 @@ Use short, imperative commit messages with a scope when helpful, such as `feat: 
 Every completed task must automatically end with a git commit unless the user explicitly says not to commit. The commit must include a full summary of the work performed, including changed behavior, documentation updates, safety impact, and any validation or tests that were run or intentionally not run. Commit only the files changed for the completed task; do not stage unrelated workspace changes.
 
 ## Security & Configuration Tips
-Do not modify source files in place from archive workflows. Keep source and destination roots separate, validate paths before use, and treat bundled WavPack tools as pinned dependencies under `third_party/wavpack/`.
+Keep source and destination roots separate, validate paths before use, and treat bundled WavPack tools as pinned dependencies under `third_party/wavpack/`. A successful archival workflow must verify each `.wv` by byte-for-byte restore and must verify the final `.tar.gz` package by extracting it and comparing packaged payload bytes before reporting completion.
