@@ -14,7 +14,7 @@ WavPackâ€™s verification and stored MD5 protect the encoded audio data. Wav
 
 ## Will WavCrusher delete my original WAVs?
 
-WavCrusher focuses on proving archive integrity first. Treat original retention as a separate user-controlled decision after verified `.wv` creation, verified `.tar.gz` packaging, redundant copies, and a restore drill.
+WavCrusher focuses on proving archive integrity first. Treat original retention as a separate user-controlled decision after verified `.wv` creation, verified `.tar.gz` packaging, redundant copies, and a restore drill. A planned option will allow safe post-verify source deletion from the UI when enabled.
 
 ## Can I restore without WavCrusher?
 

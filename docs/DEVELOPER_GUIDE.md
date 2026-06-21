@@ -213,7 +213,7 @@ Do not merge with unexplained skipped tests, placeholder hashes, analyzer suppre
 
 When a whole-file hash differs:
 
-1. Preserve source, temporary archive, restored fixture, journal, tool identity, and bounded diagnostics in an isolated test environment.
+1. Preserve source, temporary archive, restored fixture, journal, tool identity, and bounded diagnostics in an isolated test environment unless reproducing the explicit source-cleanup behavior under a controlled test case.
 2. Compare file lengths.
 3. Locate first byte difference with a diagnostic tool; do not add this expensive operation to normal success paths.
 4. Inspect RIFF chunk structure/wrapper differences.

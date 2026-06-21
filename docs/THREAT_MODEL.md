@@ -37,8 +37,8 @@ Manifests are untrusted even when produced by WavCrusher because they may be edi
 
 ### Source deletion or modification
 
-**Threat:** Bug, unsafe flag, or convenience feature changes originals.  
-**Mitigations:** Read-only opens, no destructive API path, allowlisted WavPack profile, no delete UI, source snapshots, immutability tests, independent review.
+**Threat:** Bug, unsafe flag, or convenience path changes originals unexpectedly.  
+**Mitigations:** Source is preserved by default. Cleanup is explicit, opt-in, and gated behind completed per-item and package verification, bounded user-visible UI, and an auditable deletion record.
 
 ### Root recursion/overlap
 
@@ -137,7 +137,7 @@ Manifests are untrusted even when produced by WavCrusher because they may be edi
 
 A fresh review/ADR is mandatory before adding:
 
-- Source deletion/replacement.
+- Post-verification source cleanup behavior.
 - Overwrite behavior.
 - Symlink/junction following.
 - Auto-update or network code.

@@ -39,7 +39,7 @@ Acceptance:
 
 - Real dependency hashes are recorded only when computed from approved artifacts.
 - Whole-file SHA-256 equality is demonstrated for the research corpus.
-- No source file changes.
+- No unexpected source file changes by default. Planned cleanup behavior is explicit, opt-in, and only after full verification.
 - Temporary output naming is proven, not assumed.
 
 ## Prompt 01 â€” Solution bootstrap
@@ -145,7 +145,7 @@ rich fixtures. Snapshot source tree before/after every test.
 Acceptance:
 
 - Supported fixtures round-trip exactly.
-- No source modification.
+- No unverified source modification; optional deletion is limited to explicitly enabled, post-verification workflows.
 - No failure/cancel leaves unverified final output.
 - Conflict race never overwrites.
 
@@ -236,8 +236,8 @@ Acceptance:
 ```text
 Build the Audit and Restore workspaces and an Activity/Reports view. Add only safe settings:
 worker count within tested limits, report redaction, temp workspace policy, UI preferences,
-and last locations. Do not expose arbitrary WavPack arguments, lossy/hybrid modes, source
-deletion, overwrite, wrapper discard, or verification bypass.
+and last locations. Do not expose arbitrary WavPack arguments, lossy/hybrid modes, unbounded
+source deletion, overwrite, wrapper discard, or verification bypass.
 
 About must show app/tool versions, dependency hash status, licenses, source reference, and
 o-telemetry/offline statement. Include local help and emergency wvunpack recovery steps.
@@ -268,7 +268,7 @@ Acceptance:
 
 - All supported fixtures exact.
 - No unverified final outputs across injected faults.
-- No source changes.
+- No unexpected source changes except explicit cleanup mode that is separately tested and verified.
 - Claims match measured evidence.
 
 ## Prompt 12 â€” Packaging and release candidate

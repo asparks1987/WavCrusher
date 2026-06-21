@@ -17,7 +17,7 @@ WavCrusher is an archive-creation and verification tool, not a complete backup s
 - The manifest, journal, reports, checksums, WavPack decoder, license, and documentation with each archive set.
 - A schedule for periodic audits and storage replacement.
 
-Make source-retention decisions only after verified `.wv` creation, verified `.tar.gz` packaging, multiple copies, and a recovery drill.
+Make source-retention decisions only after verified `.wv` creation, verified `.tar.gz` packaging, multiple copies, and a recovery drill. An opt-in setting is planned to delete source files after each file and the package both pass verification.
 
 ## 3. Before you begin
 
@@ -85,6 +85,7 @@ Select **Start verified archive**. For each WAV, the app:
 8. Records durable evidence.
 9. Builds the final `.tar.gz` package.
 10. Extracts and compares the packaged payload bytes before reporting package completion.
+11. If enabled, removes source files only for items that passed verification and have successfully built a verified package.
 
 ### Step 5 â€” Read status correctly
 

@@ -87,7 +87,7 @@ For each valid corpus fixture:
 4. Decode with the product decoder arguments.
 5. Compare restored length/SHA-256.
 6. Hash archive.
-7. Confirm no source metadata/content was intentionally modified.
+7. Confirm no unexpected source metadata/content was modified. If testing the optional cleanup setting, confirm only fully verified items are deleted and the action is recorded.
 
 For invalid fixtures, assert the expected typed failure and absence of a final archive.
 

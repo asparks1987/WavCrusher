@@ -24,7 +24,7 @@ The site can be published from `/docs` with GitHub Pages or the included Pages w
 - Confirm every relative documentation link resolves.
 - Keep the site free of trackers, remote fonts, CDNs, and third-party scripts.
 - Keep compression figures qualified as estimates.
-- Keep source-retention language conservative: WavCrusher verifies archives; users remain responsible for backups and retention choices.
+- Keep source-retention language clear: WavCrusher verifies archives first; users remain responsible for backups and may enable post-verify source cleanup only if they want it.
 
 ## Files
 

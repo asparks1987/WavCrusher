@@ -29,3 +29,5 @@ Every completed task must automatically end with a git commit unless the user ex
 
 ## Security & Configuration Tips
 Keep source and destination roots separate, validate paths before use, and treat bundled WavPack tools as pinned dependencies under `third_party/wavpack/`. A successful archival workflow must verify each `.wv` by byte-for-byte restore and must verify the final `.tar.gz` package by extracting it and comparing packaged payload bytes before reporting completion.
+
+Source files remain untouched by default. A planned user-facing option will remove source files only after each `.wv` and the final `.tar.gz` package have passed verification checks, and it must be explicit, off by default, and fully logged when enabled.

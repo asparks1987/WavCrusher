@@ -82,7 +82,7 @@ wvunpack --wav     generates a new WAV wrapper instead of restoring the saved on
 
 ### Archive
 
-Choose a source folder and a separate destination folder. WavCrusher scans the tree, previews the planned output paths, flags conflicts or unsupported files, estimates free-space requirements, and starts only after the user confirms the immutable-source policy.
+Choose a source folder and a separate destination folder. WavCrusher scans the tree, previews the planned output paths, flags conflicts or unsupported files, estimates free-space requirements, and starts only after the user confirms their retention settings.
 
 The result is a mirrored tree such as:
 
@@ -114,6 +114,7 @@ These are non-negotiable:
 - Files that change during processing fail with a clear â€œsource changedâ€ result.
 - Logs and manifests never claim success without all required evidence.
 - The app works offline and performs no telemetry or network transfer.
+- Optional source cleanup is off by default and may run only after both per-file `.wv` verification and final `.tar.gz` verification pass, with each deletion recorded in the operation report.
 
 See [`docs/ARCHIVE_SAFETY_SPEC.md`](docs/ARCHIVE_SAFETY_SPEC.md) for the normative specification.
 

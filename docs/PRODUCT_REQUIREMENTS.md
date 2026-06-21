@@ -18,7 +18,7 @@ WAV is durable and widely understood, but uncompressed PCM consumes substantial 
 
 A credible archival tool must do more than say â€œlossless.â€ It must:
 
-- Leave originals untouched.
+- Leave originals untouched by default.
 - Avoid overwriting unrelated destination files.
 - Reproduce complete WAV bytes, not only equivalent samples.
 - Make failures and skipped files impossible to confuse with successes.
@@ -54,7 +54,6 @@ Use an LTS runtime, open-source licensing, pinned dependencies, reproducible rel
 ## 4. Non-goals for version 1
 
 - Guaranteed globally minimal compressed size.
-- Deletion or replacement of source WAVs.
 - Lossy or hybrid encoding.
 - Audio editing, metadata editing, playback, transcoding, or normalization.
 - Cloud backup or synchronization.
@@ -136,6 +135,7 @@ Has a large WAV folder and needs a guided workflow that prevents accidental same
 | ID | Requirement |
 |---|---|
 | FR-030 | The app shall create verified `.wv` archives and retain evidence needed to support user-controlled source retention decisions. |
+| FR-030A | The app may offer an explicit user-controlled option to delete source files only after that file and the final package have passed required verification checks. |
 | FR-031 | The app shall use one fixed pure-lossless WavPack archival profile in version 1. |
 | FR-032 | The profile shall request highest compression, maximum extra analysis, stored audio MD5, output verification, timestamp copy where supported, and no overwrite. |
 | FR-033 | The app shall create missing destination directories only beneath the validated destination root. |
@@ -209,9 +209,10 @@ Has a large WAV folder and needs a guided workflow that prevents accidental same
 | ID | Requirement |
 |---|---|
 | FR-090 | Settings may include worker count, temporary-space location policy, report redaction, UI preferences, and last-used folders. |
-| FR-091 | Settings shall not expose lossy/hybrid modes, wrapper discard, overwrite, or verification bypass. |
+| FR-091 | Settings shall not expose lossy/hybrid modes, wrapper discard, unbounded overwrite, or verification bypass. |
 | FR-092 | Settings shall have safe defaults and a reset action. |
 | FR-093 | Invalid or future-version settings shall be ignored safely with a warning, not crash startup. |
+| FR-094 | Source cleanup can be enabled intentionally and defaults off, with clear confirmation and auditable deletion records. |
 
 ## 8. User experience requirements
 
@@ -330,7 +331,7 @@ Failed
 Release readinessâ€”not user surveillanceâ€”shall be measured with offline test evidence:
 
 - 100% byte-identical restoration across the supported corpus.
-- Zero source modifications in fault-injection tests.
+- No unexpected source modification in fault-injection tests; optional source cleanup is only tested when explicitly enabled and must occur after all required verification checks.
 - Zero unverified final filenames after cancellation/crash tests.
 - 100% typed terminal outcomes in test runs.
 - Clean-machine offline archive/restore success.

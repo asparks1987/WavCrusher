@@ -7,7 +7,7 @@ This checklist is evidence-based. Do not mark an item complete with â€œimple
 - [ ] Provisional name has completed public naming/trademark/package review.
 - [ ] Public claims match actual tested support and do not say â€œsmallest possible,â€ â€œfuture-proof,â€ guaranteed savings, or every WAV.
 - [ ] Version/status displayed accurately in app and website.
-- [ ] Version 1 contains no source delete/move/replace option.
+- [ ] Version 1 may include an explicit source-delete option only after full verification and with clear confirmation/audit.
 - [ ] Version 1 contains no lossy/hybrid/free-form codec settings.
 - [ ] Local-only/no-telemetry behavior verified.
 
@@ -27,7 +27,7 @@ This checklist is evidence-based. Do not mark an item complete with â€œimple
 ## 3. Source protection
 
 - [ ] Verified `.wv` archives are restored and compared byte-for-byte before success.
-- [ ] Code/argument audit finds no destructive source path/API/flag.
+- [ ] Destructive source actions are explicit, off-by-default settings with audit logs and full verification gates.
 - [ ] Before/after source snapshots pass across success, failure, cancel, crash, disk-full, and resume tests.
 - [ ] Source changes during processing are detected and block publication.
 - [ ] No test or production path writes verification output beside sources.
