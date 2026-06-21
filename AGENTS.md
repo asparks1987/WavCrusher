@@ -25,5 +25,7 @@ Use xUnit for unit and integration tests. Name tests with the pattern `MethodNam
 ## Commit & Pull Request Guidelines
 Use short, imperative commit messages with a scope when helpful, such as `feat: add archive progress details` or `fix: resolve manifest lookup`. Pull requests should summarize the change, note any safety impact, and list commands run. Include screenshots for UI changes and call out any tests not run.
 
+Every completed task must automatically end with a git commit unless the user explicitly says not to commit. The commit must include a full summary of the work performed, including changed behavior, documentation updates, safety impact, and any validation or tests that were run or intentionally not run. Commit only the files changed for the completed task; do not stage unrelated workspace changes.
+
 ## Security & Configuration Tips
 Do not modify source files in place from archive workflows. Keep source and destination roots separate, validate paths before use, and treat bundled WavPack tools as pinned dependencies under `third_party/wavpack/`.
