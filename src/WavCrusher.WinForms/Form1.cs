@@ -35,6 +35,7 @@ public partial class Form1 : Form
     private TarballArchiveManifest? _loadedManifest;
     private string _loadedPackagePath = string.Empty;
     private string _loadedPackageStagingRoot = string.Empty;
+    private bool _suppressSourceCleanupWarning;
 
     private static readonly JsonSerializerOptions ManifestJsonOptions = new()
     {
@@ -181,6 +182,33 @@ public partial class Form1 : Form
         UpdateModeControls();
     }
 
+    private void RemoveSourceAfterVerifyCheckBox_CheckedChanged(object sender, EventArgs e)
+    {
+        if (_suppressSourceCleanupWarning || !removeSourceAfterVerifyCheckBox.Checked)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            this,
+            "This permanently deletes source WAV files after WavCrusher verifies the .wv files and final .tar.gz package. This cannot be undone.",
+            "Permanent source deletion",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2);
+
+        if (confirm == DialogResult.Yes)
+        {
+            UpdateStatus("Source cleanup enabled for verified package creation.");
+            return;
+        }
+
+        _suppressSourceCleanupWarning = true;
+        removeSourceAfterVerifyCheckBox.Checked = false;
+        _suppressSourceCleanupWarning = false;
+        UpdateStatus("Source cleanup disabled.");
+    }
+
     private void CancelButton_Click(object sender, EventArgs e)
     {
         _operationCancellation?.Cancel();
@@ -263,10 +291,14 @@ public partial class Form1 : Form
             return;
         }
 
+        var removeSourcesAfterVerification = removeSourceAfterVerifyCheckBox.Checked;
         var packagePath = TarballPackagePaths.BuildPackagePath(roots.SourceRoot.Value, roots.DestinationRoot.Value, DateTime.UtcNow);
+        var retentionMessage = removeSourcesAfterVerification
+            ? $"{Environment.NewLine}{Environment.NewLine}Source cleanup is enabled. Verified source WAV files will be permanently deleted after the .wv files and final .tar.gz package are validated."
+            : string.Empty;
         var confirm = MessageBox.Show(
             this,
-            $"Create package in:{Environment.NewLine}{packagePath}{Environment.NewLine}{Environment.NewLine}Every item will be verified before publication.",
+            $"Create package in:{Environment.NewLine}{packagePath}{Environment.NewLine}{Environment.NewLine}Every item will be verified before publication.{retentionMessage}",
             "Create package",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Question,
@@ -383,13 +415,22 @@ public partial class Form1 : Form
             File.Move(packageTempPath, packagePath, overwrite: false);
             UpdateCurrentItemProgressUi(Path.GetFileName(packagePath), "Verifying package", true);
             await VerifyTarGzPackageAsync(packagePath, packageManifestRoot, tarPath, _operationCancellation.Token).ConfigureAwait(true);
+
+            var cleanupSummary = SourceCleanupSummary.Empty;
+            if (removeSourcesAfterVerification)
+            {
+                UpdateCurrentItemProgressUi("Verified sources", "Cleaning up", true);
+                cleanupSummary = await RemoveVerifiedSourcesAsync(rowSnapshot, manifestItems, _operationCancellation.Token).ConfigureAwait(true);
+            }
+
             UpdateStatus($"Created package: {packagePath}");
+            var completionMessage = BuildArchiveCompletionMessage(packagePath, cleanupSummary);
             MessageBox.Show(
                 this,
-                $"Package created and verified.{Environment.NewLine}{packagePath}",
-                "Archive complete",
+                completionMessage,
+                cleanupSummary.IssueCount > 0 ? "Archive complete with cleanup issues" : "Archive complete",
                 MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+                cleanupSummary.IssueCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
         }
         catch (OperationCanceledException)
         {
@@ -1178,6 +1219,7 @@ public partial class Form1 : Form
         clearPackagePathButton.Enabled = !busy;
         clearRestoreRootButton.Enabled = !busy;
         recursiveCheckBox.Enabled = !busy;
+        removeSourceAfterVerifyCheckBox.Enabled = !busy;
         restoreToFolderRadioButton.Enabled = !busy;
         restoreToOriginalRadioButton.Enabled = !busy;
         sourcePathTextBox.Enabled = !busy;
@@ -1350,6 +1392,88 @@ public partial class Form1 : Form
             manifestItem,
             status,
             result.Message);
+    }
+
+    private async Task<SourceCleanupSummary> RemoveVerifiedSourcesAsync(
+        IReadOnlyList<ArchiveRow> rows,
+        IReadOnlyList<TarballManifestItem?> manifestItems,
+        CancellationToken cancellationToken)
+    {
+        var deletedCount = 0;
+        var issueCount = 0;
+
+        for (var index = 0; index < rows.Count; index++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var row = rows[index];
+            var manifestItem = manifestItems[index];
+            if (manifestItem is null ||
+                !string.Equals(manifestItem.Status, ArchiveCompletedStatus, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            try
+            {
+                if (!File.Exists(row.FullPath))
+                {
+                    row.Message = "Source cleanup skipped: source file is missing.";
+                    issueCount++;
+                    filesGrid.Refresh();
+                    UpdateStatus($"Source cleanup: {row.RelativePath}");
+                    continue;
+                }
+
+                var currentHash = await ComputeSha256Async(row.FullPath, cancellationToken).ConfigureAwait(true);
+                if (!string.Equals(currentHash, manifestItem.SourceSha256.Hex, StringComparison.OrdinalIgnoreCase))
+                {
+                    row.Message = "Source cleanup skipped: source changed after verification.";
+                    issueCount++;
+                    filesGrid.Refresh();
+                    UpdateStatus($"Source cleanup: {row.RelativePath}");
+                    continue;
+                }
+
+                File.Delete(row.FullPath);
+                row.Message = "Verified source removed after package validation.";
+                deletedCount++;
+            }
+            catch (IOException ex)
+            {
+                row.Message = $"Source cleanup failed: {ex.Message}";
+                issueCount++;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                row.Message = $"Source cleanup failed: {ex.Message}";
+                issueCount++;
+            }
+
+            filesGrid.Refresh();
+            UpdateStatus($"Source cleanup: {row.RelativePath}");
+        }
+
+        return new SourceCleanupSummary(deletedCount, issueCount);
+    }
+
+    private static string BuildArchiveCompletionMessage(string packagePath, SourceCleanupSummary cleanupSummary)
+    {
+        if (!cleanupSummary.WasRequested)
+        {
+            return $"Package created and verified.{Environment.NewLine}{packagePath}";
+        }
+
+        var message =
+            $"Package created and verified.{Environment.NewLine}{packagePath}{Environment.NewLine}{Environment.NewLine}" +
+            $"Source cleanup removed {cleanupSummary.DeletedCount:N0} file(s).";
+
+        if (cleanupSummary.IssueCount > 0)
+        {
+            message += $"{Environment.NewLine}Source cleanup had {cleanupSummary.IssueCount:N0} issue(s). Review the item list for details.";
+        }
+
+        return message;
     }
 
     private static int GetArchiveWorkerCount(int itemCount) =>
@@ -1576,6 +1700,13 @@ public partial class Form1 : Form
         TarballManifestItem ManifestItem,
         string Status,
         string Message);
+
+    private sealed record SourceCleanupSummary(int DeletedCount, int IssueCount)
+    {
+        public static SourceCleanupSummary Empty { get; } = new(0, 0);
+
+        public bool WasRequested => !ReferenceEquals(this, Empty);
+    }
 
     private sealed record ProcessOutcome(int ExitCode, bool Succeeded, string Diagnostics, TimeSpan Duration);
 

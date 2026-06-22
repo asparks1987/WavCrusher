@@ -16,6 +16,7 @@ partial class Form1
     private Button clearPackagePathButton;
     private Button clearRestoreRootButton;
     private CheckBox recursiveCheckBox;
+    private CheckBox removeSourceAfterVerifyCheckBox;
     private FlowLayoutPanel commandPanel;
     private Button scanButton;
     private Button archiveButton;
@@ -63,6 +64,7 @@ partial class Form1
         clearPackagePathButton = new Button();
         clearRestoreRootButton = new Button();
         recursiveCheckBox = new CheckBox();
+        removeSourceAfterVerifyCheckBox = new CheckBox();
         commandPanel = new FlowLayoutPanel();
         scanButton = new Button();
         archiveButton = new Button();
@@ -187,6 +189,12 @@ partial class Form1
         recursiveCheckBox.AutoSize = true;
         recursiveCheckBox.AccessibleName = "Include subfolders";
         recursiveCheckBox.Margin = new Padding(0, 6, 16, 3);
+
+        removeSourceAfterVerifyCheckBox.Text = "Remove source files after verified package creation";
+        removeSourceAfterVerifyCheckBox.AutoSize = true;
+        removeSourceAfterVerifyCheckBox.AccessibleName = "Remove source files after verified package creation";
+        removeSourceAfterVerifyCheckBox.Margin = new Padding(0, 6, 16, 3);
+        removeSourceAfterVerifyCheckBox.CheckedChanged += RemoveSourceAfterVerifyCheckBox_CheckedChanged;
 
         scanButton.Text = "Scan";
         scanButton.AutoSize = true;
@@ -323,6 +331,7 @@ partial class Form1
         commandPanel.FlowDirection = FlowDirection.LeftToRight;
         commandPanel.WrapContents = false;
         commandPanel.Controls.Add(recursiveCheckBox);
+        commandPanel.Controls.Add(removeSourceAfterVerifyCheckBox);
         commandPanel.Controls.Add(scanButton);
         commandPanel.Controls.Add(archiveButton);
         commandPanel.Controls.Add(restoreButton);
