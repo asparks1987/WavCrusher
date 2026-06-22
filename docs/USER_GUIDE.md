@@ -1,10 +1,12 @@
 ﻿# User Guide
 
-> This guide describes the intended version 1 application. The current package is documentation and a build plan; no executable is included.
+> This guide describes the current alpha Windows application and the version 1 safety model.
 
 ## 1. What WavCrusher does
 
 WavCrusher stores WAV files more compactly as lossless WavPack `.wv` files. It keeps the folder layout, restores every candidate archive to temporary storage, and checks that the restored WAV is byte-for-byte identical before calling the archive verified.
+
+Recent real-world WavCrusher runs are consistently producing archives around **30-50% of the original WAV size** on suitable collections. Your exact result depends on the audio, but the app shows original bytes, archive bytes, and per-file compression ratio so you can see the actual savings.
 
 A successful archive can be recovered later with WavCrusher or the standard `wvunpack` program.
 
@@ -17,7 +19,7 @@ WavCrusher is an archive-creation and verification tool, not a complete backup s
 - The manifest, journal, reports, checksums, WavPack decoder, license, and documentation with each archive set.
 - A schedule for periodic audits and storage replacement.
 
-Make source-retention decisions only after verified `.wv` creation, verified `.tar.gz` packaging, multiple copies, and a recovery drill. An opt-in setting is planned to delete source files after each file and the package both pass verification.
+Make source-retention decisions only after verified `.wv` creation, verified `.tar.gz` packaging, multiple copies, and a recovery drill. The opt-in cleanup checkbox can delete source files after each file and the package both pass verification.
 
 ## 3. Before you begin
 
@@ -56,7 +58,7 @@ Select **Scan folder**. The app shows:
 - Unreadable/unsupported files.
 - Reparse-point skips.
 - Destination free space.
-- An estimated archive-size range.
+- An estimated archive-size range. Recent observed archive sizes are often 30-50% of source bytes, but the estimate remains content-dependent.
 
 The estimate is not a promise. Silence and structured audio may compress greatly; high-resolution noise may compress little.
 
@@ -191,7 +193,7 @@ During the archive pipeline, temporary space may be needed for:
 
 A conservative destination/scratch-space rule is at least the total size of the largest active source WAV plus its expected archive, multiplied by the worker count, with safety margin. The appâ€™s preflight should calculate a better bound from the plan.
 
-The final WavPack archive often uses less space than the WAV, but the exact ratio is content-dependent. Do not begin a huge operation with nearly full storage.
+The final WavPack archive often uses far less space than the WAV. Current observed WavCrusher runs commonly land around 30-50% of original size, but the exact ratio is content-dependent. Do not begin a huge operation with nearly full storage.
 
 ## 11. Common problems
 

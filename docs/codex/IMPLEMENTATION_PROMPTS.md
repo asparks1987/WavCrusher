@@ -258,7 +258,7 @@ matrix in TESTING_STRATEGY.md, including PCM widths, float, channels/rates, meta
 odd padding, trailers, RF64 strategy, Unicode/long names, silence, and noise. Record fixture
 provenance and hashes.
 
-Complete all fault-injection, path-security, source-immutability, journal truncation,
+Complete all fault-injection, path-security, source-retention cleanup, journal truncation,
 resume, tool tamper, disk-full, locked/changing file, process crash/hang, and soak tests.
 Fix defects; do not weaken expected outcomes. Update the supported-input matrix from actual
 evidence and record qualified benchmarks.

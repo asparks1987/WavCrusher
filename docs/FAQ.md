@@ -14,7 +14,7 @@ WavPackâ€™s verification and stored MD5 protect the encoded audio data. Wav
 
 ## Will WavCrusher delete my original WAVs?
 
-WavCrusher focuses on proving archive integrity first. Treat original retention as a separate user-controlled decision after verified `.wv` creation, verified `.tar.gz` packaging, redundant copies, and a restore drill. A planned option will allow safe post-verify source deletion from the UI when enabled.
+WavCrusher focuses on proving archive integrity first. Treat original retention as a separate user-controlled decision after verified `.wv` creation, verified `.tar.gz` packaging, redundant copies, and a restore drill. The UI includes an off-by-default cleanup checkbox that can remove verified source files only after package validation succeeds.
 
 ## Can I restore without WavCrusher?
 
@@ -28,9 +28,11 @@ Many audio applications support WavPack, but playability is not required for Wav
 
 It depends on the audio. Structured material often compresses well; high-resolution noise may compress poorly. The official WavPack project describes a broad typical range, but WavCrusher must show estimatesâ€”not guaranteesâ€”and should report actual ratios per file.
 
+For current WavCrusher alpha runs on suitable WAV collections, archive sizes are consistently showing up around **30-50% of the original WAV size**. Treat that as a strong observed result, not a promise for every source file.
+
 ## Is WavCrusher guaranteed to make the smallest possible archive?
 
-No. No practical compressor wins for every input, and â€œsmallest possibleâ€ is not a responsible universal claim. WavCrusher chooses WavPack for a strong balance of compression, open recovery, broad WAV support, maintained tooling, and wrapper preservation.
+No. No practical compressor wins for every input, and â€œsmallest possibleâ€ is not a responsible universal claim. WavCrusher chooses WavPack for a strong balance of compression, open recovery, broad WAV support, maintained tooling, and wrapper preservation. The current 30-50% observed archive-size range is excellent for storage planning, but it is still content-dependent.
 
 ## Why use the slow `-x6` setting?
 

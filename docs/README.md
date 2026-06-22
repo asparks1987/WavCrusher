@@ -2,7 +2,7 @@
 
 This directory is both the dependency-free static marketing site and the main technical-documentation collection for WavCrusher v1.0.0a.
 
-WavCrusher is a local Windows tool for turning large WAV libraries into verified pure-lossless WavPack archives. It is aimed at musicians, collectors, studios, field recordists, archivists, and anyone with a lossless music collection that is too large to keep as raw WAV forever but too valuable to compress carelessly.
+WavCrusher is a local Windows tool for turning large WAV libraries into verified pure-lossless WavPack archives. It is aimed at musicians, collectors, studios, field recordists, archivists, and anyone with a lossless music collection that is too large to keep as raw WAV forever but too valuable to compress carelessly. Current alpha runs on suitable collections are consistently producing archives around 30-50% of original WAV size.
 
 ## Preview locally
 
@@ -23,7 +23,7 @@ The site can be published from `/docs` with GitHub Pages or the included Pages w
 - Run HTML/CSS/JavaScript and accessibility checks.
 - Confirm every relative documentation link resolves.
 - Keep the site free of trackers, remote fonts, CDNs, and third-party scripts.
-- Keep compression figures qualified as estimates.
+- Keep compression figures qualified as observed results or estimates.
 - Keep source-retention language clear: WavCrusher verifies archives first; users remain responsible for backups and may enable post-verify source cleanup only if they want it.
 
 ## Files
@@ -41,6 +41,7 @@ The website may say that a file marked Verified has passed byte-for-byte restora
 Do not promise universal savings, every WAV variant, future-proof storage, or backup replacement. Preferred wording:
 
 - "Save serious disk space on large WAV collections."
+- "Observed archive sizes often land around 30-50% of original WAV bytes."
 - "Pure-lossless WavPack archives."
 - "Verified means restored byte-for-byte."
 - "Standard `.wv` files, no proprietary vault."

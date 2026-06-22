@@ -17,7 +17,7 @@ WavPack audio MD5 is useful evidence, but it does not replace complete-file SHA-
 
 ## Source handling
 
-Source WAV files are archival inputs. WavCrusher must prove the `.wv` archive and final `.tar.gz` package before reporting success. Users should make multiple verified archive copies and perform recovery drills before making retention decisions. A future V1.0+ option will allow users to delete sources after verification only when explicitly enabled.
+Source WAV files are archival inputs. WavCrusher must prove the `.wv` archive and final `.tar.gz` package before reporting success. Users should make multiple verified archive copies and perform recovery drills before making retention decisions. Source cleanup is available only when explicitly enabled and may delete source files only after verification succeeds.
 
 ## Path safety
 

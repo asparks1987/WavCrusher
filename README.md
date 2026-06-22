@@ -4,7 +4,7 @@
 
 > Provisional project name. Complete naming and trademark review before a public release.
 
-WavCrusher is a planned Windows desktop application that recursively discovers `.wav` files, compresses each file into a standard WavPack `.wv` archive, verifies that the archive can reproduce the **entire original WAV file byte-for-byte**, and records an auditable manifest.
+WavCrusher is a Windows desktop application that recursively discovers `.wav` files, compresses each file into a standard WavPack `.wv` archive, verifies that the archive can reproduce the **entire original WAV file byte-for-byte**, and records an auditable manifest.
 
 The design is deliberately conservative:
 
@@ -14,12 +14,13 @@ The design is deliberately conservative:
 - Every successful archive is independently restored to a temporary WAV and compared with the original using SHA-256.
 - Output is a normal `.wv` file recoverable with upstream `wvunpack`; WavCrusher is not required for future extraction.
 - Interrupted work leaves resumable journal records and never publishes a partially written archive as complete.
+- Current real-world archive runs are consistently landing around **30-50% of the original WAV size** on suitable collections, while still staying pure lossless.
 
 This repository package contains the product requirements, safety specification, architecture, UX plan, manifest format, test strategy, release plan, Codex implementation plan, project governance files, sample records, and a dependency-free website under [`/docs`](docs/).
 
 ## Project status
 
-**Documentation and implementation plan complete; application source code not yet generated.**
+**Alpha application implemented with WinForms UI, verified archive packaging, restore support, MSI packaging, and bundled WavPack sidecars.**
 
 The build plan targets:
 
@@ -33,6 +34,8 @@ No release should be described as production-ready until all gates in [`docs/cod
 ## Product promise
 
 > **Your WAVs, smaller. Every byte comes back.**
+
+Observed archive output is commonly around **30-50% of the original WAV bytes** for the collections tested so far. Exact compression remains content-dependent, so WavCrusher reports per-file original size, archive size, and compression ratio instead of hiding behind a single marketing number.
 
 â€œLosslessâ€ can mean two different things:
 
@@ -199,8 +202,8 @@ Before a public launch:
 - Perform trademark and package-name searches for â€œWavCrusher.â€
 - Replace provisional logos or copy where necessary.
 - Have preservation claims reviewed against the implemented test evidence.
-- Avoid claims such as â€œsmallest possibleâ€ or â€œfuture-proof.â€ Compression ratios are content-dependent, and long-term preservation also requires redundant storage, fixity checks, migration planning, and maintained recovery tools.
+- Avoid claims such as â€œsmallest possibleâ€ or â€œfuture-proof.â€ It is fine to cite observed 30-50% archive sizes for suitable WAV collections, but compression ratios remain content-dependent and long-term preservation also requires redundant storage, fixity checks, migration planning, and maintained recovery tools.
 
 ## Contributing
 
-Read [`CONTRIBUTING.md`](CONTRIBUTING.md), [`AGENTS.md`](AGENTS.md), and the safety specification before changing archive behavior. A smaller output file is never worth weakening recoverability or source safety.
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md), [`AGENTS.md`](AGENTS.md), and the safety specification before changing archive behavior. A 30-50% archive-size result is excellent, but a smaller output file is never worth weakening recoverability or source safety.

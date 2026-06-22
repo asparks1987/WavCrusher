@@ -23,7 +23,7 @@ Only after user selection, the app may read:
 - Operation-owned temporary files.
 - Per-user settings and bounded diagnostic logs in a documented local app-data folder.
 
-The app never writes to source WAVs by design.
+The app does not modify source WAV contents. Source files are preserved by default; if the user explicitly enables verified source cleanup, WavCrusher may delete source files only after the `.wv` archives and final `.tar.gz` package pass verification.
 
 ## Network behavior
 

@@ -5,7 +5,7 @@ This checklist is evidence-based. Do not mark an item complete with â€œimple
 ## 1. Product and scope
 
 - [ ] Provisional name has completed public naming/trademark/package review.
-- [ ] Public claims match actual tested support and do not say â€œsmallest possible,â€ â€œfuture-proof,â€ guaranteed savings, or every WAV.
+- [ ] Public claims match actual tested support and do not say â€œsmallest possible,â€ â€œfuture-proof,â€ guaranteed savings, or every WAV; observed 30-50% archive-size claims are backed by real runs.
 - [ ] Version/status displayed accurately in app and website.
 - [ ] Version 1 may include an explicit source-delete option only after full verification and with clear confirmation/audit.
 - [ ] Version 1 contains no lossy/hybrid/free-form codec settings.
@@ -31,7 +31,7 @@ This checklist is evidence-based. Do not mark an item complete with â€œimple
 - [ ] Before/after source snapshots pass across success, failure, cancel, crash, disk-full, and resume tests.
 - [ ] Source changes during processing are detected and block publication.
 - [ ] No test or production path writes verification output beside sources.
-- [ ] Independent reviewer signs off source-immutability design/code.
+- [ ] Independent reviewer signs off source-retention and verified-cleanup design/code.
 
 ## 4. Root and path containment
 
@@ -130,6 +130,7 @@ This checklist is evidence-based. Do not mark an item complete with â€œimple
 - [ ] Process crash/hang, tool tamper, low disk, permission loss, and journal failure injected.
 - [ ] 100,000-file scan/plan soak target met without unbounded memory.
 - [ ] Qualified performance/compression report records corpus/hardware/settings; no universal claims.
+- [ ] Public docs and website cite 30-50% archive sizes only as observed results for suitable WAV collections.
 
 ## 11. Windows Forms UX and accessibility
 

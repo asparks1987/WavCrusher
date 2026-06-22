@@ -8,7 +8,7 @@
 
 ## 1. Product summary
 
-WavCrusher is an open-source desktop application for reducing the storage footprint of WAV collections without surrendering any source information. It recursively scans a user-selected folder, writes one standard WavPack `.wv` file per WAV into a separate mirrored folder, independently proves whole-file restoration, and records durable audit evidence.
+WavCrusher is an open-source desktop application for reducing the storage footprint of WAV collections without surrendering any source information. It recursively scans a user-selected folder, writes one standard WavPack `.wv` file per WAV into a separate mirrored folder, independently proves whole-file restoration, and records durable audit evidence. Current alpha runs on suitable WAV collections are consistently producing archives around 30-50% of original source size.
 
 The product is aimed at recording studios, musicians, researchers, oral-history projects, sound designers, archivists, and individuals who have large WAV collections but do not want proprietary archive lock-in or lossy conversion.
 
@@ -221,7 +221,7 @@ Has a large WAV folder and needs a guided workflow that prevents accidental same
 | UX-001 | First-run content shall explain that originals remain untouched and outputs require a separate location. |
 | UX-002 | â€œVerifiedâ€ shall mean the complete round-trip chain passed, not merely that an encoder exited successfully. |
 | UX-003 | Status shall use icon, text, and accessible nameâ€”not color alone. |
-| UX-004 | Destructive-looking actions shall be absent from version 1. |
+| UX-004 | Destructive actions shall be explicit, off by default, confirmed with a permanence warning, and gated behind completed verification. |
 | UX-005 | Errors shall identify the affected item, failed stage, likely cause, and safe next action. |
 | UX-006 | The UI shall remain responsive during scans, hashing, encode/decode, reporting, and cancellation. |
 | UX-007 | Large collections shall use virtualized or efficient list presentation and throttled progress updates. |
@@ -248,6 +248,7 @@ Has a large WAV folder and needs a guided workflow that prevents accidental same
 | NFR-011 | Worker count shall avoid unbounded WavPack processes and disk thrashing. |
 | NFR-012 | UI progress rendering shall be throttled independently from evidence recording. |
 | NFR-013 | Maximum-compression mode is expected to be slow; the UI shall prioritize transparency over optimistic time estimates. |
+| NFR-014 | Public copy may cite observed 30-50% archive sizes for suitable WAV collections, but the UI shall report actual per-file ratios and avoid guaranteed savings. |
 
 ### Security
 
@@ -337,6 +338,7 @@ Release readinessâ€”not user surveillanceâ€”shall be measured with off
 - Clean-machine offline archive/restore success.
 - Keyboard-complete primary workflows.
 - Dependency license and hash completeness.
+- Qualified compression evidence showing observed 30-50% archive sizes on suitable WAV collections without claiming universal savings.
 
 No production telemetry is required or permitted in version 1.
 

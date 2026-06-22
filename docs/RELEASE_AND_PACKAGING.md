@@ -18,7 +18,7 @@ The v1.0.0a build produces a **self-contained Windows x64 MSI installer** plus a
 Current installed layout:
 
 ```text
-C:\Program Files\WaveCrusher\
+C:\Program Files\WavCrusher\
   WavCrusher.WinForms.exe
   WavCrusher.*.dll
   wavpack.exe
@@ -102,7 +102,7 @@ Version 1 should not contain an auto-updater or executable downloader. The About
 
 The MSI installer is now part of the alpha release tooling. It must continue to satisfy:
 
-- Per-machine install to `C:\Program Files\WaveCrusher`.
+- Per-machine install to `C:\Program Files\WavCrusher`.
 - Desktop shortcut creation.
 - Standard-user app operation after install.
 - Uninstall that never touches archive/source/user content.
@@ -118,7 +118,7 @@ The dependency-free site under `/docs` can be deployed from the repository. It m
 
 - Match actual release status.
 - Use no trackers, external fonts, or CDNs.
-- Sell the space-saving value while avoiding guaranteed compression promises.
+- Sell the observed 30-50% archive-size results for suitable WAV collections while avoiding guaranteed compression promises.
 - Link to source, release checksums, docs, and recovery instructions once those exist.
 - Keep "Verified means byte-for-byte restored" precise and prominent.
 
