@@ -465,7 +465,7 @@ function New-MsiPackage(
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="$productName" Manufacturer="$(ConvertTo-WixXml $Manufacturer)" Version="$MsiVersion" UpgradeCode="$upgradeCode" Scope="perMachine">
-    <MajorUpgrade DowngradeErrorMessage="A newer version of $productName is already installed." />
+    <MajorUpgrade AllowDowngrades="yes" />
     <MediaTemplate EmbedCab="yes" />
     <Icon Id="WavCrusherIcon" SourceFile="$(ConvertTo-WixXml $IconPath)" />
     <Property Id="ARPPRODUCTICON" Value="WavCrusherIcon" />

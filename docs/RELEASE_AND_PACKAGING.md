@@ -60,6 +60,8 @@ MAJOR.MINOR.PATCH[-prerelease]
 
 Archive profile and manifest versions are separate identifiers. App version changes do not automatically require a manifest major bump.
 
+The MSI uses Windows Installer's numeric three-part product version only for package metadata. WavCrusher release labels are user-defined, so the installer is configured to replace an existing WavCrusher install regardless of MSI's numeric newer/older comparison.
+
 ## 5. WavPack dependency acquisition
 
 For the pinned official release:
