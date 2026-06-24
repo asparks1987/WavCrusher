@@ -1,12 +1,12 @@
 ﻿# User Guide
 
-> This guide describes the current alpha Windows application and the version 1 safety model.
+> This guide describes WavCrusher v1.0.21a alpha and the version 1 safety model.
 
 ## 1. What WavCrusher does
 
 WavCrusher stores WAV files more compactly as lossless WavPack `.wv` files. It keeps the folder layout, restores every candidate archive to temporary storage, and checks that the restored WAV is byte-for-byte identical before calling the archive verified.
 
-Recent real-world WavCrusher runs are consistently producing archives around **30-50% of the original WAV size** on suitable collections. Your exact result depends on the audio, but the app shows original bytes, archive bytes, and per-file compression ratio so you can see the actual savings.
+Recent real-world WavCrusher v1.0.21a alpha runs are consistently producing archives around **30-50% of the original WAV size** on suitable collections. Your exact result depends on the audio, but the app shows original bytes, archive bytes, and per-file compression ratio so you can see the actual savings.
 
 A successful archive can be recovered later with WavCrusher or the standard `wvunpack` program.
 

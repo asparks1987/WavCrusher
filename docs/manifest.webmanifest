@@ -1,7 +1,7 @@
 ﻿{
   "name": "WavCrusher Documentation",
   "short_name": "WavCrusher",
-  "description": "Open-source verified lossless WAV storage project documentation.",
+  "description": "WavCrusher v1.0.21a verified lossless WAV archiving documentation.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#071722",

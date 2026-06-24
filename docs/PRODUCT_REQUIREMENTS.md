@@ -1,14 +1,14 @@
 ﻿# Product Requirements Document
 
-**Product:** WavCrusher (provisional name)  
-**Document status:** Implementation-ready draft  
-**Target release:** 1.0  
+**Product:** WavCrusher  
+**Document status:** v1.0.21a alpha baseline  
+**Target release:** v1.0.21a alpha  
 **Primary platform:** Windows 10/11 x64  
 **UI technology:** Windows Forms on .NET 10 LTS
 
 ## 1. Product summary
 
-WavCrusher is an open-source desktop application for reducing the storage footprint of WAV collections without surrendering any source information. It recursively scans a user-selected folder, writes one standard WavPack `.wv` file per WAV into a separate mirrored folder, independently proves whole-file restoration, and records durable audit evidence. Current alpha runs on suitable WAV collections are consistently producing archives around 30-50% of original source size.
+WavCrusher is an open-source desktop application for reducing the storage footprint of WAV collections without surrendering any source information. It recursively scans a user-selected folder, writes one standard WavPack `.wv` file per WAV into a verified package, independently proves whole-file restoration, and records durable audit evidence. Current v1.0.21a alpha runs on suitable WAV collections are consistently producing archives around 30-50% of original source size.
 
 The product is aimed at recording studios, musicians, researchers, oral-history projects, sound designers, archivists, and individuals who have large WAV collections but do not want proprietary archive lock-in or lossy conversion.
 
@@ -291,7 +291,7 @@ Version 1 shall support the set of PCM/IEEE-float WAV variants proven by the pin
 
 The application must not claim support based solely on extension. It shall surface WavPack rejection as `UnsupportedWave` or a more precise typed failure. Compressed WAV codecs such as ADPCM are not assumed supported.
 
-The final public support matrix must be generated from tests and list known exceptions.
+The public support matrix must be generated from tests and list known exceptions.
 
 ## 11. Operation states
 

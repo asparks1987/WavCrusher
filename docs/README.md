@@ -1,6 +1,6 @@
 # WavCrusher `/docs` Site
 
-This directory is both the dependency-free static marketing site and the main technical-documentation collection for WavCrusher v1.0.0a.
+This directory is both the dependency-free static marketing site and the main technical-documentation collection for WavCrusher v1.0.21a.
 
 WavCrusher is a local Windows tool for turning large WAV libraries into verified pure-lossless WavPack archives. It is aimed at musicians, collectors, studios, field recordists, archivists, and anyone with a lossless music collection that is too large to keep as raw WAV forever but too valuable to compress carelessly. Current alpha runs on suitable collections are consistently producing archives around 30-50% of original WAV size.
 
@@ -31,6 +31,7 @@ The site can be published from `/docs` with GitHub Pages or the included Pages w
 - `index.html` - one-page product site.
 - `styles.css` - responsive visual design.
 - `app.js` - storage estimator and progressive enhancement.
+- `RELEASE_NOTES.md` - current GitHub release notes for v1.0.21a.
 - `favicon.svg`, `manifest.webmanifest`, `404.html`, `.nojekyll` - deployment support.
 - Markdown files - product, user, engineering, safety, release, and recovery documentation.
 

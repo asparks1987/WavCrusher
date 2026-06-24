@@ -13,7 +13,7 @@ A WavCrusher release must be:
 
 ## 2. Release form
 
-The v1.0.0a build produces a **self-contained Windows x64 MSI installer** plus a published application folder under `artifacts/`. The installer gives normal users a familiar setup flow, desktop shortcut, and themed icon while preserving the recovery principle: WavPack sidecars remain visible in the installed payload.
+The v1.0.21a build produces a **self-contained Windows x64 MSI installer** plus a published application folder under `artifacts/`. The installer gives normal users a familiar setup flow, desktop shortcut, and themed icon while preserving the recovery principle: WavPack sidecars remain visible in the installed payload.
 
 Current installed layout:
 
@@ -46,7 +46,13 @@ A portable ZIP can still be added later as a secondary artifact because it is co
 .\buildwavcrusher.ps1 -NoRestore
 ```
 
-The script publishes `win-x64` self-contained, generates the themed application icon, copies WavPack sidecars, bootstraps WiX Toolset locally under `artifacts/tools/`, and builds the MSI.
+For the official v1.0.21a alpha release:
+
+```powershell
+.\buildwavcrusher.ps1 -ProductVersion 1.0.21a -NoRestore
+```
+
+The script publishes `win-x64` self-contained, prompts for a version when one is not provided, generates the themed application icon, copies WavPack sidecars, bootstraps WiX Toolset locally under `artifacts/tools/`, and builds the MSI.
 
 Do not enable trimming unless the complete WinForms application and serialization paths are tested. Do not enable Native AOT merely for packaging simplicity.
 
@@ -121,6 +127,7 @@ The dependency-free site under `/docs` can be deployed from the repository. It m
 - Sell the observed 30-50% archive-size results for suitable WAV collections while avoiding guaranteed compression promises.
 - Link to source, release checksums, docs, and recovery instructions once those exist.
 - Keep "Verified means byte-for-byte restored" precise and prominent.
+- Link to `RELEASE_NOTES.md` for the current GitHub release notes.
 
 ## 11. Archiving the project itself
 

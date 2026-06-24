@@ -2,7 +2,7 @@
 
 **Open-source, lossless WAV storage for Windows.**
 
-> Provisional project name. Complete naming and trademark review before a public release.
+> Current official alpha release: **v1.0.21a** for Windows 10/11 x64.
 
 WavCrusher is a Windows desktop application that recursively discovers `.wav` files, compresses each file into a standard WavPack `.wv` archive, verifies that the archive can reproduce the **entire original WAV file byte-for-byte**, and records an auditable manifest.
 
@@ -16,11 +16,11 @@ The design is deliberately conservative:
 - Interrupted work leaves resumable journal records and never publishes a partially written archive as complete.
 - Current real-world archive runs are consistently landing around **30-50% of the original WAV size** on suitable collections, while still staying pure lossless.
 
-This repository package contains the product requirements, safety specification, architecture, UX plan, manifest format, test strategy, release plan, Codex implementation plan, project governance files, sample records, and a dependency-free website under [`/docs`](docs/).
+This repository package contains the WinForms application, product requirements, safety specification, architecture, UX plan, manifest format, test strategy, release plan, project governance files, sample records, and a dependency-free website under [`/docs`](docs/).
 
 ## Project status
 
-**Alpha application implemented with WinForms UI, verified archive packaging, restore support, MSI packaging, and bundled WavPack sidecars.**
+**Official alpha v1.0.21a is implemented with WinForms UI, verified archive packaging, restore support, MSI packaging, optional verified source cleanup, and bundled WavPack sidecars.**
 
 The build plan targets:
 
@@ -29,7 +29,7 @@ The build plan targets:
 - WavPack 5.9.0 command-line tools pinned and distributed with their license and hashes.
 - A self-contained application distribution that does not require a system-wide WavPack installation.
 
-No release should be described as production-ready until all gates in [`docs/codex/ACCEPTANCE_CHECKLIST.md`](docs/codex/ACCEPTANCE_CHECKLIST.md) pass.
+The v1.0.21a release is an alpha, not a stable/production guarantee. Stable release language should wait until all gates in [`docs/codex/ACCEPTANCE_CHECKLIST.md`](docs/codex/ACCEPTANCE_CHECKLIST.md) pass.
 
 ## Product promise
 
@@ -65,7 +65,7 @@ The intended WavPack profile is equivalent to:
 wavpack -hh -x6 -m -v -t -z0 --no-overwrite <source.wav> <temporary-name.partial.wv>
 ```
 
-Arguments must be supplied with `ProcessStartInfo.ArgumentList`; the application must never construct a shell command string. The adapter must confirm actual behavior against the pinned WavPack release before implementation is merged.
+Arguments are supplied with `ProcessStartInfo.ArgumentList`; the application must never construct a shell command string. The adapter behavior is tied to the pinned WavPack release shipped with the installer.
 
 ### Forbidden options
 
@@ -164,19 +164,16 @@ See [`docs/ARCHIVE_SAFETY_SPEC.md`](docs/ARCHIVE_SAFETY_SPEC.md) for the normati
 | Build the manifest model | [`docs/MANIFEST_SPEC.md`](docs/MANIFEST_SPEC.md) |
 | Build the UI | [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) and product requirements |
 | Test and release | [`docs/TESTING_STRATEGY.md`](docs/TESTING_STRATEGY.md) and [`docs/RELEASE_AND_PACKAGING.md`](docs/RELEASE_AND_PACKAGING.md) |
+| Release notes | [`docs/RELEASE_NOTES.md`](docs/RELEASE_NOTES.md) |
 | Preview marketing copy | [`docs/index.html`](docs/index.html) |
 
 ## Build outline
 
-Once source implementation exists:
-
 ```powershell
-dotnet restore
-dotnet build WavCrusher.sln -c Release --no-restore
-dotnet test WavCrusher.sln -c Release --no-build
-dotnet publish src/WavCrusher.WinForms/WavCrusher.WinForms.csproj `
-  -c Release -r win-x64 --self-contained true `
-  -p:PublishSingleFile=true
+dotnet restore WavCrusher.sln
+dotnet build WavCrusher.sln --no-restore
+dotnet test WavCrusher.sln --no-build
+.\buildwavcrusher.ps1 -ProductVersion 1.0.21a -NoRestore
 ```
 
 Exact SDK versions belong in `global.json`; dependency versions and WavPack artifact hashes must be pinned in source control. Never insert guessed hashes into release metadata.
@@ -193,11 +190,11 @@ Do not add `--wav`, `--raw`, normalization, format-conversion, or metadata-alter
 
 ## Licensing
 
-WavCrusher documentation and planned application source are offered under the MIT License. WavPack is a separate project distributed under its own BSD-style license. Bundled WavPack executables must retain upstream notices, version provenance, and cryptographic hashes. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+WavCrusher documentation and application source are offered under the MIT License. WavPack is a separate project distributed under its own BSD-style license. Bundled WavPack executables must retain upstream notices, version provenance, and cryptographic hashes. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ## Name and claim review
 
-Before a public launch:
+Before a stable public launch:
 
 - Perform trademark and package-name searches for â€œWavCrusher.â€
 - Replace provisional logos or copy where necessary.

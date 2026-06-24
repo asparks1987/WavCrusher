@@ -14,7 +14,7 @@ WavPackâ€™s verification and stored MD5 protect the encoded audio data. Wav
 
 ## Will WavCrusher delete my original WAVs?
 
-WavCrusher focuses on proving archive integrity first. Treat original retention as a separate user-controlled decision after verified `.wv` creation, verified `.tar.gz` packaging, redundant copies, and a restore drill. The UI includes an off-by-default cleanup checkbox that can remove verified source files only after package validation succeeds.
+WavCrusher focuses on proving archive integrity first. Treat original retention as a separate user-controlled decision after verified `.wv` creation, verified `.tar.gz` packaging, redundant copies, and a restore drill. The v1.0.21a UI includes an off-by-default cleanup checkbox that can remove verified source files only after package validation succeeds.
 
 ## Can I restore without WavCrusher?
 
@@ -28,7 +28,7 @@ Many audio applications support WavPack, but playability is not required for Wav
 
 It depends on the audio. Structured material often compresses well; high-resolution noise may compress poorly. The official WavPack project describes a broad typical range, but WavCrusher must show estimatesâ€”not guaranteesâ€”and should report actual ratios per file.
 
-For current WavCrusher alpha runs on suitable WAV collections, archive sizes are consistently showing up around **30-50% of the original WAV size**. Treat that as a strong observed result, not a promise for every source file.
+For current WavCrusher v1.0.21a alpha runs on suitable WAV collections, archive sizes are consistently showing up around **30-50% of the original WAV size**. Treat that as a strong observed result, not a promise for every source file.
 
 ## Is WavCrusher guaranteed to make the smallest possible archive?
 
@@ -68,7 +68,7 @@ The whole-file promise covers file bytes. The app plans to record common timesta
 
 ## Does it support every WAV file?
 
-No universal claim is made. The planned scope includes uncompressed PCM and IEEE-float WAV variants supported and proven by the pinned WavPack toolchain. Compressed WAV codecs such as ADPCM may be unsupported and will be reported without modifying the original.
+No universal claim is made. The alpha scope focuses on uncompressed PCM and IEEE-float WAV variants supported and proven by the pinned WavPack toolchain. Compressed WAV codecs such as ADPCM may be unsupported and will be reported without modifying the original.
 
 ## Is this a backup program?
 
